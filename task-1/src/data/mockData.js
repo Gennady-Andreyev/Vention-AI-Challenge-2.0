@@ -9,7 +9,7 @@ export const employees = [
     id: 1,
     name: 'Ihar Kavaleu',
     title: 'Senior Software Engineer',
-    unit: 'BY01',
+    unit: 'SE01',
     activities: [
       { id: 'a1', name: '[REG] Meetup "Patterns of Modern Distributed Systems"', category: CATEGORIES.PUBLIC_SPEAKING, date: '2025-11-20', points: 64 },
       { id: 'a2', name: '[REG] Conference Talk "Scaling Node.js Services"', category: CATEGORIES.PUBLIC_SPEAKING, date: '2025-09-14', points: 64 },
@@ -26,7 +26,7 @@ export const employees = [
     id: 2,
     name: 'Raman Bahdanau',
     title: 'Group Manager',
-    unit: 'BY02',
+    unit: 'SE06',
     activities: [
       { id: 'b1', name: '[REG] Conference "Leadership in Engineering Teams"', category: CATEGORIES.PUBLIC_SPEAKING, date: '2025-10-10', points: 64 },
       { id: 'b2', name: '[REG] Panel Discussion "Engineering Culture"', category: CATEGORIES.PUBLIC_SPEAKING, date: '2025-07-22', points: 64 },
@@ -40,7 +40,7 @@ export const employees = [
     id: 3,
     name: 'Volha Astapenka',
     title: 'Lead QA Engineer',
-    unit: 'BY03',
+    unit: 'QA01',
     activities: [
       { id: 'c1', name: '[LAB] Lecture "Playwright Workshop Advanced 1"', category: CATEGORIES.EDUCATION, date: '2025-04-14', points: 16 },
       { id: 'c2', name: '[LAB] Lecture "Playwright Workshop Advanced 2"', category: CATEGORIES.EDUCATION, date: '2025-04-14', points: 16 },
@@ -50,7 +50,7 @@ export const employees = [
       { id: 'c6', name: '[LAB] Mentoring of Alena Mikalaeva', category: CATEGORIES.EDUCATION, date: '2025-04-15', points: 64 },
       { id: 'c7', name: '[LAB] Mentoring of Marek Kowalski', category: CATEGORIES.EDUCATION, date: '2025-04-15', points: 64 },
       { id: 'c8', name: '[REG] Offline Meetup "Quality Gates: Stop, Test, Go!"', category: CATEGORIES.PUBLIC_SPEAKING, date: '2025-05-14', points: 64 },
-      { id: 'c9', name: '[LAB] Mentoring of Anastasiya Hramyka', category: CATEGORIES.EDUCATION, date: '2025-03-12', points: 64 },
+      { id: 'c9', name: '[LAB] Mentoring of Magdalena Lewandowska', category: CATEGORIES.EDUCATION, date: '2025-03-12', points: 64 },
       { id: 'c10', name: '[REG] Meetup "QA Automation in 2025"', category: CATEGORIES.PUBLIC_SPEAKING, date: '2024-10-08', points: 64 },
     ],
   },
@@ -58,7 +58,7 @@ export const employees = [
     id: 4,
     name: 'Mikalai Hancharou',
     title: 'Lead QA Engineer',
-    unit: 'BY04',
+    unit: 'QA02',
     activities: [
       { id: 'd1', name: '[REG] Offline Meetup in Bratislava "Quality Gates: Stop, Test, Go!"', category: CATEGORIES.PUBLIC_SPEAKING, date: '2025-05-14', points: 64 },
       { id: 'd2', name: '[LAB] Mentoring of Vital Drozd', category: CATEGORIES.EDUCATION, date: '2025-04-15', points: 64 },
@@ -76,13 +76,13 @@ export const employees = [
     id: 5,
     name: 'Maryia Bandarenka',
     title: 'QA Engineer',
-    unit: 'BY05',
+    unit: 'QA03',
     activities: [
       { id: 'e1', name: '[LAB] Lecture "Introduction to Test Automation"', category: CATEGORIES.EDUCATION, date: '2025-08-12', points: 16 },
       { id: 'e2', name: '[LAB] Lecture "API Testing with Postman"', category: CATEGORIES.EDUCATION, date: '2025-06-20', points: 16 },
       { id: 'e3', name: '[LAB] Lecture "Selenium vs Playwright"', category: CATEGORIES.EDUCATION, date: '2025-05-05', points: 16 },
       { id: 'e4', name: '[LAB] Lecture "Writing Effective Test Cases"', category: CATEGORIES.EDUCATION, date: '2025-03-28', points: 16 },
-      { id: 'e5', name: '[LAB] Mentoring of Anastasiya Hramyka', category: CATEGORIES.EDUCATION, date: '2025-02-14', points: 64 },
+      { id: 'e5', name: '[LAB] Mentoring of Magdalena Lewandowska', category: CATEGORIES.EDUCATION, date: '2025-02-14', points: 64 },
       { id: 'e6', name: '[LAB] Lecture "BDD with Cucumber"', category: CATEGORIES.EDUCATION, date: '2024-11-19', points: 16 },
       { id: 'e7', name: '[LAB] Lecture "Performance Testing Basics"', category: CATEGORIES.EDUCATION, date: '2024-09-07', points: 16 },
       { id: 'e8', name: '[LAB] Lecture "Test Reporting Best Practices"', category: CATEGORIES.EDUCATION, date: '2024-08-14', points: 16 },
@@ -91,9 +91,9 @@ export const employees = [
   },
   {
     id: 6,
-    name: 'Yauheni Kazlou',
+    name: 'Aziz Yuldashev',
     title: 'Software Engineer',
-    unit: 'BY06',
+    unit: 'SE02',
     activities: [
       { id: 'f1', name: '[LAB] Lecture "Introduction to React Hooks"', category: CATEGORIES.EDUCATION, date: '2025-09-03', points: 16 },
       { id: 'f2', name: '[LAB] Lecture "State Management with Redux Toolkit"', category: CATEGORIES.EDUCATION, date: '2025-07-17', points: 16 },
@@ -111,7 +111,7 @@ export const employees = [
     id: 7,
     name: 'Yanina Karpenka',
     title: 'HR Manager',
-    unit: 'BY07',
+    unit: 'HR01',
     activities: [
       { id: 'g1', name: '[LAB] Lecture "Onboarding Best Practices"', category: CATEGORIES.EDUCATION, date: '2025-10-07', points: 16 },
       { id: 'g2', name: '[LAB] Lecture "Building Psychological Safety"', category: CATEGORIES.EDUCATION, date: '2025-08-21', points: 16 },
@@ -123,7 +123,7 @@ export const employees = [
     id: 8,
     name: 'Alesia Charnyshova',
     title: 'Senior QA Engineer',
-    unit: 'BY08',
+    unit: 'QA04',
     activities: [
       { id: 'h1', name: '[LAB] Lecture "Contract Testing with Pact"', category: CATEGORIES.EDUCATION, date: '2025-11-05', points: 16 },
       { id: 'h2', name: '[LAB] Lecture "Visual Regression Testing"', category: CATEGORIES.EDUCATION, date: '2025-09-18', points: 16 },
@@ -134,9 +134,9 @@ export const employees = [
   },
   {
     id: 9,
-    name: 'Anastasiya Hramyka',
+    name: 'Magdalena Lewandowska',
     title: 'QA Engineer',
-    unit: 'BY09',
+    unit: 'QA05',
     activities: [
       { id: 'i1', name: '[LAB] Lecture "Load Testing with k6"', category: CATEGORIES.EDUCATION, date: '2025-10-24', points: 16 },
       { id: 'i2', name: '[LAB] Lecture "Mobile Testing Fundamentals"', category: CATEGORIES.EDUCATION, date: '2025-08-09', points: 16 },
@@ -149,7 +149,7 @@ export const employees = [
     id: 10,
     name: 'Marek Kowalski',
     title: 'Software Engineer',
-    unit: 'PL01',
+    unit: 'SE03',
     activities: [
       { id: 'j1', name: '[LAB] Lecture "C# Collections and Data Structures"', category: CATEGORIES.EDUCATION, date: '2025-10-14', points: 16 },
       { id: 'j2', name: '[LAB] Lecture "LINQ in Practice"', category: CATEGORIES.EDUCATION, date: '2025-08-27', points: 16 },
@@ -163,12 +163,12 @@ export const employees = [
     id: 11,
     name: 'Siarhei Sakalouski',
     title: 'Senior Software Engineer',
-    unit: 'BY10',
+    unit: 'SE04',
     activities: [
       { id: 'k1', name: '[LAB] Lecture "Docker Compose for Development"', category: CATEGORIES.EDUCATION, date: '2025-11-12', points: 16 },
       { id: 'k2', name: '[LAB] Lecture "Kubernetes Basics"', category: CATEGORIES.EDUCATION, date: '2025-09-25', points: 16 },
       { id: 'k3', name: '[LAB] Lecture "CI/CD Pipelines with GitHub Actions"', category: CATEGORIES.EDUCATION, date: '2025-07-08', points: 16 },
-      { id: 'k4', name: '[LAB] Mentoring of Yauheni Kazlou', category: CATEGORIES.EDUCATION, date: '2025-04-22', points: 64 },
+      { id: 'k4', name: '[LAB] Mentoring of Aziz Yuldashev', category: CATEGORIES.EDUCATION, date: '2025-04-22', points: 64 },
       { id: 'k5', name: '[LAB] Lecture "Helm Charts in Practice"', category: CATEGORIES.EDUCATION, date: '2025-05-20', points: 16 },
       { id: 'k6', name: '[UNI] Lecture for students "DevOps Fundamentals"', category: CATEGORIES.UNIVERSITY, date: '2025-03-18', points: 32 },
     ],
@@ -177,7 +177,7 @@ export const employees = [
     id: 12,
     name: 'Vilte Petrauskaite',
     title: 'QA Engineer',
-    unit: 'LT01',
+    unit: 'QA06',
     activities: [
       { id: 'l1', name: '[UNI] Lecture for students "From Campus to Vention: Our IT Breakthrough"', category: CATEGORIES.UNIVERSITY, date: '2025-04-06', points: 32 },
       { id: 'l2', name: '[UNI] Lecture for students at ITPU (repeat)', category: CATEGORIES.UNIVERSITY, date: '2025-04-03', points: 16 },
@@ -195,7 +195,7 @@ export const employees = [
     id: 13,
     name: 'Khasan Yusupov',
     title: 'Senior Software Engineer',
-    unit: 'UZ01',
+    unit: 'SE05',
     activities: [
       { id: 'm1', name: '[LAB] Mentoring of Alisher Raximov', category: CATEGORIES.EDUCATION, date: '2025-12-10', points: 64 },
       { id: 'm2', name: '[LAB] Lecture "Introduction to ASP .Net Core (WEB API)"', category: CATEGORIES.EDUCATION, date: '2025-10-21', points: 16 },
@@ -212,7 +212,7 @@ export const employees = [
     id: 14,
     name: 'Giorgi Beridze',
     title: 'Frontend Engineer',
-    unit: 'GE01',
+    unit: 'FE01',
     activities: [
       { id: 'n1', name: '[UNI] Lecture for students "Breaking into IT: A Graduate\'s Path"', category: CATEGORIES.UNIVERSITY, date: '2025-05-15', points: 32 },
       { id: 'n2', name: '[UNI] Lecture for students at INHA (repeat)', category: CATEGORIES.UNIVERSITY, date: '2025-05-10', points: 16 },
@@ -224,7 +224,7 @@ export const employees = [
     id: 15,
     name: 'Alena Mikalaeva',
     title: 'Product Manager',
-    unit: 'BY11',
+    unit: 'PM01',
     activities: [
       { id: 'o1', name: '[UNI] Guest Lecture "Product Thinking for Engineers"', category: CATEGORIES.UNIVERSITY, date: '2025-06-20', points: 32 },
       { id: 'o2', name: '[LAB] Lecture "Writing Effective PRDs"', category: CATEGORIES.EDUCATION, date: '2025-04-09', points: 16 },
