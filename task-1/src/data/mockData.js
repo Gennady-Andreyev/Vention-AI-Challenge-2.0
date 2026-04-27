@@ -33,6 +33,7 @@ export const employees = [
       { id: 'b3', name: '[REG] Talk "How We Built Our Engineering Ladders"', category: CATEGORIES.PUBLIC_SPEAKING, date: '2025-04-03', points: 64 },
       { id: 'b4', name: '[LAB] Mentoring of Vilte Petrauskaite', category: CATEGORIES.EDUCATION, date: '2024-12-15', points: 64 },
       { id: 'b5', name: '[LAB] Lecture "Effective 1-on-1s"', category: CATEGORIES.EDUCATION, date: '2024-10-08', points: 16 },
+      { id: 'b6', name: '[REG] Conference Talk "Hiring Senior Engineers"', category: CATEGORIES.PUBLIC_SPEAKING, date: '2024-08-15', points: 64 },
     ],
   },
   {
@@ -49,6 +50,8 @@ export const employees = [
       { id: 'c6', name: '[LAB] Mentoring of Alena Mikalaeva', category: CATEGORIES.EDUCATION, date: '2025-04-15', points: 64 },
       { id: 'c7', name: '[LAB] Mentoring of Marek Kowalski', category: CATEGORIES.EDUCATION, date: '2025-04-15', points: 64 },
       { id: 'c8', name: '[REG] Offline Meetup "Quality Gates: Stop, Test, Go!"', category: CATEGORIES.PUBLIC_SPEAKING, date: '2025-05-14', points: 64 },
+      { id: 'c9', name: '[LAB] Mentoring of Anastasiya Hramyka', category: CATEGORIES.EDUCATION, date: '2025-03-12', points: 64 },
+      { id: 'c10', name: '[REG] Meetup "QA Automation in 2025"', category: CATEGORIES.PUBLIC_SPEAKING, date: '2024-10-08', points: 64 },
     ],
   },
   {
@@ -65,6 +68,8 @@ export const employees = [
       { id: 'd6', name: '[LAB] Lecture "Playwright Workshop Advanced 1"', category: CATEGORIES.EDUCATION, date: '2025-04-14', points: 16 },
       { id: 'd7', name: '[LAB] Lecture "Playwright Workshop Advanced 2"', category: CATEGORIES.EDUCATION, date: '2025-04-14', points: 16 },
       { id: 'd8', name: '[LAB] Lecture "Playwright Workshop Base 1"', category: CATEGORIES.EDUCATION, date: '2025-04-14', points: 16 },
+      { id: 'd9', name: '[LAB] Lecture "API Testing with Postman"', category: CATEGORIES.EDUCATION, date: '2025-03-21', points: 16 },
+      { id: 'd10', name: '[LAB] Mentoring of Maryia Bandarenka', category: CATEGORIES.EDUCATION, date: '2025-02-08', points: 64 },
     ],
   },
   {
@@ -80,6 +85,8 @@ export const employees = [
       { id: 'e5', name: '[LAB] Mentoring of Anastasiya Hramyka', category: CATEGORIES.EDUCATION, date: '2025-02-14', points: 64 },
       { id: 'e6', name: '[LAB] Lecture "BDD with Cucumber"', category: CATEGORIES.EDUCATION, date: '2024-11-19', points: 16 },
       { id: 'e7', name: '[LAB] Lecture "Performance Testing Basics"', category: CATEGORIES.EDUCATION, date: '2024-09-07', points: 16 },
+      { id: 'e8', name: '[LAB] Lecture "Test Reporting Best Practices"', category: CATEGORIES.EDUCATION, date: '2024-08-14', points: 16 },
+      { id: 'e9', name: '[UNI] Lecture for students "QA as a Career Path"', category: CATEGORIES.UNIVERSITY, date: '2025-04-10', points: 32 },
     ],
   },
   {
@@ -97,6 +104,7 @@ export const employees = [
       { id: 'f7', name: '[LAB] Lecture "Testing React Components"', category: CATEGORIES.EDUCATION, date: '2024-10-15', points: 16 },
       { id: 'f8', name: '[REG] Talk "From Junior to Senior Frontend Dev"', category: CATEGORIES.PUBLIC_SPEAKING, date: '2025-03-22', points: 64 },
       { id: 'f9', name: '[REG] Meetup "Modern CSS Techniques"', category: CATEGORIES.PUBLIC_SPEAKING, date: '2024-11-28', points: 64 },
+      { id: 'f10', name: '[UNI] Lecture for students "From Bootcamp to Junior Dev"', category: CATEGORIES.UNIVERSITY, date: '2025-05-22', points: 32 },
     ],
   },
   {
@@ -108,6 +116,7 @@ export const employees = [
       { id: 'g1', name: '[LAB] Lecture "Onboarding Best Practices"', category: CATEGORIES.EDUCATION, date: '2025-10-07', points: 16 },
       { id: 'g2', name: '[LAB] Lecture "Building Psychological Safety"', category: CATEGORIES.EDUCATION, date: '2025-08-21', points: 16 },
       { id: 'g3', name: '[LAB] Mentoring of Alesia Charnyshova', category: CATEGORIES.EDUCATION, date: '2025-06-10', points: 64 },
+      { id: 'g4', name: '[LAB] Lecture "Hiring for Cultural Fit"', category: CATEGORIES.EDUCATION, date: '2025-04-15', points: 16 },
     ],
   },
   {
@@ -120,6 +129,7 @@ export const employees = [
       { id: 'h2', name: '[LAB] Lecture "Visual Regression Testing"', category: CATEGORIES.EDUCATION, date: '2025-09-18', points: 16 },
       { id: 'h3', name: '[LAB] Lecture "Shift-Left Testing Strategy"', category: CATEGORIES.EDUCATION, date: '2025-07-02', points: 16 },
       { id: 'h4', name: '[LAB] Mentoring of Siarhei Sakalouski', category: CATEGORIES.EDUCATION, date: '2025-04-28', points: 64 },
+      { id: 'h5', name: '[LAB] Mentoring of Marek Kowalski', category: CATEGORIES.EDUCATION, date: '2025-03-08', points: 64 },
     ],
   },
   {
@@ -131,6 +141,8 @@ export const employees = [
       { id: 'i1', name: '[LAB] Lecture "Load Testing with k6"', category: CATEGORIES.EDUCATION, date: '2025-10-24', points: 16 },
       { id: 'i2', name: '[LAB] Lecture "Mobile Testing Fundamentals"', category: CATEGORIES.EDUCATION, date: '2025-08-09', points: 16 },
       { id: 'i3', name: '[LAB] Mentoring of Vilte Petrauskaite', category: CATEGORIES.EDUCATION, date: '2025-05-16', points: 64 },
+      { id: 'i4', name: '[LAB] Lecture "Cypress Best Practices"', category: CATEGORIES.EDUCATION, date: '2025-06-04', points: 16 },
+      { id: 'i5', name: '[LAB] Lecture "Test Data Management"', category: CATEGORIES.EDUCATION, date: '2025-04-19', points: 16 },
     ],
   },
   {
@@ -143,6 +155,8 @@ export const employees = [
       { id: 'j2', name: '[LAB] Lecture "LINQ in Practice"', category: CATEGORIES.EDUCATION, date: '2025-08-27', points: 16 },
       { id: 'j3', name: '[LAB] Lecture "Entity Framework Core"', category: CATEGORIES.EDUCATION, date: '2025-06-13', points: 16 },
       { id: 'j4', name: '[LAB] Mentoring of Alena Mikalaeva', category: CATEGORIES.EDUCATION, date: '2025-03-05', points: 64 },
+      { id: 'j5', name: '[LAB] Lecture "Async/Await Patterns in C#"', category: CATEGORIES.EDUCATION, date: '2025-04-30', points: 16 },
+      { id: 'j6', name: '[LAB] Lecture "Dependency Injection in .NET"', category: CATEGORIES.EDUCATION, date: '2025-02-14', points: 16 },
     ],
   },
   {
@@ -155,6 +169,8 @@ export const employees = [
       { id: 'k2', name: '[LAB] Lecture "Kubernetes Basics"', category: CATEGORIES.EDUCATION, date: '2025-09-25', points: 16 },
       { id: 'k3', name: '[LAB] Lecture "CI/CD Pipelines with GitHub Actions"', category: CATEGORIES.EDUCATION, date: '2025-07-08', points: 16 },
       { id: 'k4', name: '[LAB] Mentoring of Yauheni Kazlou', category: CATEGORIES.EDUCATION, date: '2025-04-22', points: 64 },
+      { id: 'k5', name: '[LAB] Lecture "Helm Charts in Practice"', category: CATEGORIES.EDUCATION, date: '2025-05-20', points: 16 },
+      { id: 'k6', name: '[UNI] Lecture for students "DevOps Fundamentals"', category: CATEGORIES.UNIVERSITY, date: '2025-03-18', points: 32 },
     ],
   },
   {
@@ -169,6 +185,10 @@ export const employees = [
       { id: 'l4', name: '[LAB] Lecture "Risk-Based Testing"', category: CATEGORIES.EDUCATION, date: '2025-02-18', points: 16 },
       { id: 'l5', name: '[LAB] Lecture "Defect Lifecycle Management"', category: CATEGORIES.EDUCATION, date: '2024-12-10', points: 16 },
       { id: 'l6', name: '[LAB] Lecture "Exploratory Testing Techniques"', category: CATEGORIES.EDUCATION, date: '2024-10-02', points: 16 },
+      { id: 'l7', name: '[LAB] Mentoring of Giorgi Beridze', category: CATEGORIES.EDUCATION, date: '2025-03-22', points: 64 },
+      { id: 'l8', name: '[LAB] Lecture "Test Pyramid in Practice"', category: CATEGORIES.EDUCATION, date: '2025-01-15', points: 16 },
+      { id: 'l9', name: '[LAB] Lecture "Code Review Checklists"', category: CATEGORIES.EDUCATION, date: '2024-11-08', points: 16 },
+      { id: 'l10', name: '[LAB] Lecture "Flaky Test Mitigation"', category: CATEGORIES.EDUCATION, date: '2024-09-25', points: 16 },
     ],
   },
   {
@@ -184,6 +204,8 @@ export const employees = [
       { id: 'm5', name: '[UNI] Lecture for students at ITPU (repeat)', category: CATEGORIES.UNIVERSITY, date: '2025-04-03', points: 16 },
       { id: 'm6', name: '[UNI] Lecture for students at INHA', category: CATEGORIES.UNIVERSITY, date: '2025-04-01', points: 32 },
       { id: 'm7', name: '[LAB] Mentoring of Rustam Polvonov', category: CATEGORIES.EDUCATION, date: '2025-02-12', points: 64 },
+      { id: 'm8', name: '[LAB] Mentoring of Bekzod Karimov', category: CATEGORIES.EDUCATION, date: '2025-08-20', points: 64 },
+      { id: 'm9', name: '[LAB] Lecture "Dapper ORM Basics"', category: CATEGORIES.EDUCATION, date: '2025-06-15', points: 16 },
     ],
   },
   {
@@ -207,6 +229,7 @@ export const employees = [
       { id: 'o1', name: '[UNI] Guest Lecture "Product Thinking for Engineers"', category: CATEGORIES.UNIVERSITY, date: '2025-06-20', points: 32 },
       { id: 'o2', name: '[LAB] Lecture "Writing Effective PRDs"', category: CATEGORIES.EDUCATION, date: '2025-04-09', points: 16 },
       { id: 'o3', name: '[LAB] Lecture "Stakeholder Communication"', category: CATEGORIES.EDUCATION, date: '2025-02-20', points: 16 },
+      { id: 'o4', name: '[UNI] Guest Lecture "Roadmap Prioritization"', category: CATEGORIES.UNIVERSITY, date: '2025-03-15', points: 32 },
     ],
   },
 ]
