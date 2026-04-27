@@ -12,7 +12,13 @@ export default function App() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS)
   const [expandedIds, setExpandedIds] = useState(new Set())
 
-  const ranked = useMemo(() => applyFilters(employees, filters), [filters])
+  const { ranked, filtered } = useMemo(() => applyFilters(employees, filters), [filters])
+
+  const podiumEntries = useMemo(() => {
+    const top3 = ranked.slice(0, 3)
+    const term = filters.search.trim().toLowerCase()
+    return term ? top3.filter(p => p.name.toLowerCase().includes(term)) : top3
+  }, [ranked, filters.search])
 
   function toggleRow(id) {
     setExpandedIds(prev => {
@@ -32,12 +38,12 @@ export default function App() {
 
         <Filters filters={filters} onChange={setFilters} />
 
-        {ranked.length >= 3 && (
-          <Podium ranked={ranked} />
+        {ranked.length >= 3 && podiumEntries.length > 0 && (
+          <Podium entries={podiumEntries} />
         )}
 
         <LeaderboardList
-          ranked={ranked}
+          ranked={filtered}
           expandedIds={expandedIds}
           onToggle={toggleRow}
         />

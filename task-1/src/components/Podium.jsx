@@ -54,10 +54,10 @@ function PodiumColumn({ person, medal, rank }) {
   )
 }
 
-export default function Podium({ ranked }) {
-  const first = ranked[0]
-  const second = ranked[1]
-  const third = ranked[2]
+export default function Podium({ entries }) {
+  const first = entries.find(e => e?.rank === 1)
+  const second = entries.find(e => e?.rank === 2)
+  const third = entries.find(e => e?.rank === 3)
 
   return (
     <div className="podium">

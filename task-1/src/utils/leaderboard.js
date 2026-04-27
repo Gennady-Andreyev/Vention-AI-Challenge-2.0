@@ -21,10 +21,9 @@ export function getAvailableYears(employees) {
 export function applyFilters(employees, { year, quarter, category, search }) {
   const noDateFilter = year === 'all' && quarter === 'all'
   const noCategoryFilter = category === 'all'
-  const noSearchFilter = !search.trim()
   const noFilter = noDateFilter && noCategoryFilter
 
-  return employees
+  const ranked = employees
     .map(emp => {
       let acts = emp.activities
       if (year !== 'all') acts = acts.filter(a => getYear(a.date) === year)
@@ -33,13 +32,16 @@ export function applyFilters(employees, { year, quarter, category, search }) {
       const total = acts.reduce((sum, a) => sum + a.points, 0)
       return { ...emp, filteredActivities: acts, filteredTotal: total }
     })
-    .filter(emp => {
-      const hasPoints = noFilter || emp.filteredTotal > 0
-      const matchesSearch = noSearchFilter || emp.name.toLowerCase().includes(search.trim().toLowerCase())
-      return hasPoints && matchesSearch
-    })
+    .filter(emp => noFilter || emp.filteredTotal > 0)
     .sort((a, b) => b.filteredTotal - a.filteredTotal)
     .map((emp, i) => ({ ...emp, rank: i + 1 }))
+
+  const term = search.trim().toLowerCase()
+  const filtered = term
+    ? ranked.filter(emp => emp.name.toLowerCase().includes(term))
+    : ranked
+
+  return { ranked, filtered }
 }
 
 export function getCategoryCountsForRow(activities) {
