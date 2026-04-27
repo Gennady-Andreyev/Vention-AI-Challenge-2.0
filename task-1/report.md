@@ -29,14 +29,17 @@ All real names and department codes were replaced with mocked equivalents:
 - Names use realistic Eastern European first/last names (no relation to real employees)
 - Unit codes are fictional (UA01, BY03, PL07, UZ01, etc.)
 - Activity descriptions were reused as-is when they contained no personal data (lecture names, event names); mentoring entries were rewritten with mocked names
-- Avatars are initials-only (no photos used)
+- Avatars are initials-only (no photos used); background colour is deterministically derived from initials via a short hash mapped to a 5-colour pastel palette, so each person always gets the same colour
 
 ### Implementation
 
 - **Framework:** React 18 + Vite (plain JavaScript)
-- **Icons:** lucide-react (GraduationCap, Monitor, Smile, Star, ChevronDown, ChevronUp, Search)
-- **Styling:** plain CSS — no utility-class frameworks
-- **Filtering logic:** each filter recalculates per-person totals from matching activities only; people with zero matching points are hidden; the ranking updates accordingly
+- **Icons:** lucide-react (GraduationCap, Presentation, Smile, ChevronDown, ChevronUp, Search); the podium star is an inline SVG to avoid lucide's filled-star limitation
+- **Styling:** plain CSS — no utility-class frameworks; design tokens scoped as CSS custom properties on `.podium`
+- **Podium design:** rank-1 column uses a gold double-ring avatar (white inner border + amber outer box-shadow), an amber badge, and a warm-yellow score pill; rank-2 and rank-3 use identical gray gradient platforms to match the original screenshot; platform height decreases with rank and scales down on mobile — platforms remain visible at all breakpoints
+- **Filtering logic:** `applyFilters` returns two arrays — `ranked` (full re-ranking ignoring search) and `filtered` (search applied on top). The podium is always drawn from the top 3 of `ranked` and then narrowed to only the names that match the current search term, so searching for a top-3 person still shows them on the podium rather than hiding it
+- **Expand/collapse state:** row open/closed state is keyed by employee ID in a `Set`; it survives filter and search changes because the IDs are stable
+- **Responsiveness:** below 900 px the podium stacks vertically (gold first, then silver, then bronze) at a fixed width; the filter bar wraps to two rows on narrow screens
 - **Deployment:** gh-pages package with `--dest task-1` flag so the app lives at `/Vention-AI-Challenge-2.0/task-1/` without colliding with future tasks
 
 ## Live URL
