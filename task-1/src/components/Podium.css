@@ -201,11 +201,12 @@
 @media (max-width: 900px) {
   .podium {
     flex-direction: column;
-    align-items: stretch;
+    align-items: center;
     gap: 14px;
   }
   .podium-col {
-    width: 100%;
+    width: 264px;
+    max-width: 100%;
   }
   .podium-col--gold {
     margin-bottom: 0;
@@ -213,13 +214,34 @@
   }
   .podium-col--silver { order: 2; }
   .podium-col--bronze { order: 3; }
-  .podium-block { display: none; }
   .podium-userblock {
     margin-bottom: 0;
     padding: 16px;
     background: #fff;
     border: 1px solid #e5e7eb;
-    border-radius: 12px;
+    border-bottom: none;
+    border-radius: 12px 12px 0 0;
+  }
+  .podium-block {
+    width: 100%;
+  }
+  .podium-block--gold {
+    height: 80px;
+  }
+  .podium-block--gold span {
+    font-size: 56px;
+  }
+  .podium-block--silver {
+    height: 70px;
+  }
+  .podium-block--silver span {
+    font-size: 48px;
+  }
+  .podium-block--bronze {
+    height: 60px;
+  }
+  .podium-block--bronze span {
+    font-size: 40px;
   }
   .podium-avatar--gold {
     width: 96px;
