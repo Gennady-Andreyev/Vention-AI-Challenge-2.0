@@ -24,22 +24,24 @@ export default function App() {
 
   return (
     <div className="page">
-      <header className="page-header">
-        <h1 className="page-title">Leaderboard</h1>
-        <p className="page-subtitle">Top performers based on contributions and activity</p>
-      </header>
+      <div className="leaderboard-container">
+        <header className="page-header">
+          <h1 className="page-title">Leaderboard</h1>
+          <p className="page-subtitle">Top performers based on contributions and activity</p>
+        </header>
 
-      <Filters filters={filters} onChange={setFilters} />
+        <Filters filters={filters} onChange={setFilters} />
 
-      {ranked.length >= 3 && (
-        <Podium ranked={ranked} />
-      )}
+        {ranked.length >= 3 && (
+          <Podium ranked={ranked} />
+        )}
 
-      <LeaderboardList
-        ranked={ranked}
-        expandedIds={expandedIds}
-        onToggle={toggleRow}
-      />
+        <LeaderboardList
+          ranked={ranked}
+          expandedIds={expandedIds}
+          onToggle={toggleRow}
+        />
+      </div>
     </div>
   )
 }

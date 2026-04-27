@@ -27,13 +27,13 @@
 
 .rank-num {
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 700;
   color: #6b7280;
 }
 
-.rank-gold   { color: #f59e0b; }
-.rank-silver { color: #9ca3af; }
-.rank-bronze { color: #d97706; }
+.rank-gold   { color: #eab308; }
+.rank-silver { color: #94a3b8; }
+.rank-bronze { color: #c2410c; }
 
 .lb-avatar {
   width: 44px;
@@ -74,20 +74,23 @@
 .lb-cats {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 18px;
   flex-shrink: 0;
 }
 
+/* icon stacked above count */
 .lb-cat-item {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 4px;
-  font-size: 14px;
+  gap: 2px;
+  font-size: 13px;
+  font-weight: 500;
   color: #374151;
 }
 
 .lb-cat-icon {
-  color: #6b7280;
+  color: #0ea5e9;
 }
 
 .lb-total {
@@ -95,16 +98,27 @@
   flex-direction: column;
   align-items: flex-end;
   flex-shrink: 0;
-  min-width: 80px;
-  border-left: 1px solid #e5e7eb;
+  min-width: 90px;
+  position: relative;
   padding-left: 16px;
+}
+
+.lb-total::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 36px;
+  width: 1px;
+  background: #e5e7eb;
 }
 
 .lb-total-label {
   font-size: 10px;
   font-weight: 600;
   color: #9ca3af;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   margin-bottom: 2px;
 }
 
@@ -112,21 +126,21 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
-  color: #1e3a5f;
+  color: #0ea5e9;
 }
 
 .lb-star {
-  color: #3b82f6;
+  color: #0ea5e9;
 }
 
 .lb-toggle {
-  background: #f3f4f6;
-  border: none;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
   border-radius: 50%;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -137,7 +151,7 @@
 }
 
 .lb-toggle:hover {
-  background: #e5e7eb;
+  background: #f3f4f6;
 }
 
 /* Expanded activity section */
@@ -145,6 +159,7 @@
 .lb-activities {
   border-top: 1px solid #e5e7eb;
   padding: 20px 24px 24px;
+  background: #f9fafb;
 }
 
 .lb-activities-title {
@@ -158,14 +173,14 @@
 .activity-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .activity-table thead th {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  color: #6b7280;
+  letter-spacing: 0.08em;
+  color: #9ca3af;
   text-align: left;
   padding: 0 12px 10px 0;
   border-bottom: 1px solid #e5e7eb;
@@ -176,7 +191,7 @@
 }
 
 .activity-table tbody tr {
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .activity-table tbody tr:last-child {
@@ -184,35 +199,82 @@
 }
 
 .activity-table tbody td {
-  padding: 13px 12px 13px 0;
-  color: #374151;
+  padding: 17px 12px 17px 0;
+  color: #111827;
   vertical-align: middle;
 }
 
 .act-name {
-  font-weight: 500;
+  font-weight: 400;
+  font-size: 15px;
+  color: #111827;
 }
 
 .act-date {
   white-space: nowrap;
   color: #6b7280;
+  font-size: 14px;
 }
 
 .act-points {
   text-align: right;
   font-weight: 600;
-  color: #3b82f6;
+  color: #0ea5e9;
   white-space: nowrap;
+  font-size: 17px;
 }
 
 .cat-pill {
   display: inline-block;
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: 10px;
+  font-size: 13px;
   font-weight: 500;
-  white-space: nowrap;
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #e5e7eb;
+  background: #e5e7eb;
+  color: #475569;
+  line-height: 1.3;
+}
+
+@media (max-width: 640px) {
+  .lb-row-header {
+    padding: 12px 14px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .lb-cats {
+    gap: 12px;
+    order: 3;
+  }
+  .lb-total {
+    min-width: auto;
+    padding-left: 12px;
+  }
+  .lb-total::before {
+    height: 28px;
+  }
+  .lb-total-score {
+    font-size: 20px;
+  }
+  .lb-activities {
+    padding: 16px 14px 18px;
+  }
+  .activity-table {
+    font-size: 13px;
+  }
+  .activity-table thead th {
+    font-size: 10px;
+  }
+  .act-name {
+    font-size: 13px;
+  }
+  .act-points {
+    font-size: 15px;
+  }
+  .cat-pill {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+  .activity-table tbody td {
+    padding: 12px 8px 12px 0;
+  }
 }

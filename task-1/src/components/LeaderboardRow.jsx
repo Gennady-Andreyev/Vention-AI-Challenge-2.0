@@ -1,4 +1,4 @@
-import { GraduationCap, Monitor, Smile, Star, ChevronDown, ChevronUp } from 'lucide-react'
+import { GraduationCap, Presentation, Smile, Star, ChevronDown, ChevronUp } from 'lucide-react'
 import { CATEGORIES } from '../data/mockData'
 import { getCategoryCountsForRow, CATEGORY_ORDER } from '../utils/leaderboard'
 import './LeaderboardRow.css'
@@ -8,7 +8,7 @@ function getInitials(name) {
 }
 
 const CATEGORY_ICONS = {
-  [CATEGORIES.PUBLIC_SPEAKING]: Monitor,
+  [CATEGORIES.PUBLIC_SPEAKING]: Presentation,
   [CATEGORIES.EDUCATION]: GraduationCap,
   [CATEGORIES.UNIVERSITY]: Smile,
 }
@@ -47,7 +47,7 @@ export default function LeaderboardRow({ person, expanded, onToggle }) {
             const Icon = CATEGORY_ICONS[cat]
             return (
               <div key={cat} className="lb-cat-item" title={cat}>
-                <Icon size={16} className="lb-cat-icon" />
+                <Icon size={20} className="lb-cat-icon" />
                 <span>{count}</span>
               </div>
             )
@@ -56,7 +56,7 @@ export default function LeaderboardRow({ person, expanded, onToggle }) {
         <div className="lb-total">
           <div className="lb-total-label">TOTAL</div>
           <div className="lb-total-score">
-            <Star size={16} fill="currentColor" className="lb-star" />
+            <Star size={20} fill="currentColor" className="lb-star" />
             <span>{filteredTotal}</span>
           </div>
         </div>
