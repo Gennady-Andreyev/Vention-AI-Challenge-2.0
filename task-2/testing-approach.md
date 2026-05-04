@@ -203,6 +203,26 @@ Pass criteria:
 - Ticket persists after refresh.
 - My Tickets shows all upcoming Going tickets for the signed-in user, not only the newest one.
 
+Scenario 10A: Ticket ownership and direct ticket URL access
+Steps:
+- Reset demo data.
+- Sign in as Maya.
+- RSVP to `/events/e_upcoming_open` if needed.
+- Open Maya's ticket and copy the ticket URL or ticket code.
+- Sign out.
+- Open Maya's ticket URL while signed out.
+- Sign in as Priya and open Maya's ticket URL.
+- Sign in as Omar and open Maya's ticket URL.
+- Sign in as Alex and open Maya's ticket URL.
+- Sign in as Jordan and open Maya's ticket URL.
+- Sign back in as Maya and open Maya's ticket URL.
+Pass criteria:
+- Signed-out ticket URL access redirects to sign-in with redirect preserved.
+- Only Maya can view Maya's ticket.
+- Other signed-in users see a neutral denied/not-found state.
+- The denied state does not leak attendee name, email, QR code, event-specific ticket details, or whether the ticket code exists.
+- Hosts and Checkers validate codes through the check-in page, not through owner ticket pages.
+
 Scenario 11: Full event waitlist
 Steps:
 - Reset demo data.
@@ -230,6 +250,28 @@ Pass criteria:
 - Priya has Going status and ticket/promotion notice.
 - Riley remains Waitlisted.
 - Counts stay valid.
+
+Scenario 12A: Runtime waitlist promotion after cancellation and login notification
+Steps:
+- Reset demo data.
+- Sign in as Jordan and create or edit a future Public Published event with capacity `1`. Use visible UI only.
+- Sign out.
+- Sign in as user A, preferably Maya, and RSVP to the event. Confirm user A is Going and has a ticket.
+- Sign out.
+- Sign in as user B, preferably Priya, and RSVP to the same event. Confirm user B is Waitlisted and does not have a confirmed ticket.
+- Sign out user B before the cancellation happens.
+- Sign in as user A and cancel the RSVP from the event page, ticket page, or My Tickets.
+- Sign out user A.
+- Sign in again as user B.
+- Check the first screen after login, My Tickets, and the event detail page.
+Pass criteria:
+- The event never exceeds capacity.
+- User B is automatically promoted from Waitlisted to Going after user A cancels.
+- User B receives a ticket after promotion.
+- User B sees an in-app promotion notification/banner/message on login or in My Tickets. It must be visible without typing a direct route or inspecting localStorage.
+- User B is no longer shown as Waitlisted for that event.
+- User A's cancelled RSVP no longer counts as Going.
+- The promotion is persisted after refresh.
 
 Scenario 13: FIFO promotion after capacity increase
 Steps:
@@ -299,6 +341,28 @@ Pass criteria:
 - CSV download is triggered.
 - If content can be inspected, headers are exactly: name, email, RSVP status, check-in time.
 - If content can be inspected, rows include attendee name, email, RSVP status, and blank or populated check-in time in a spreadsheet-safe comma-separated format.
+- Populated check-in times are timezone-aware UTC ISO timestamps ending in `Z`, for example `2026-05-12T18:08:00.000Z`.
+- Seeded initial check-ins export non-empty UTC check-in times.
+
+Scenario 16A: Runtime check-in CSV timestamp and undo consistency
+Steps:
+- Reset demo data.
+- Sign in as Maya.
+- RSVP to `/events/e_upcoming_open` if needed and copy Maya's ticket code.
+- Sign in as Alex or Jordan.
+- Open the check-in page through visible UI.
+- Enter Maya's ticket code and confirm successful check-in.
+- Sign in as Jordan if not already Host.
+- Export CSV for the checked-in event.
+- Inspect the downloaded CSV if the browser allows it.
+- Return to the check-in page and use Undo last scan.
+- Export CSV for the same event again.
+Pass criteria:
+- Runtime check-in creates a persisted check-in timestamp.
+- Maya's exported `check-in time` is non-empty after check-in.
+- The timestamp is timezone-aware UTC ISO ending in `Z`.
+- Undo last scan clears Maya's exported `check-in time`.
+- Counters and CSV stay consistent after refresh.
 
 Scenario 17: Roles and route guards
 Steps:
@@ -323,19 +387,23 @@ Steps:
 - Reach Host member/invite management through visible Host UI navigation.
 - Generate/copy a Checker invite link.
 - Generate/copy a Host invite link.
+- Confirm each generated invite shows an expiry or otherwise communicates that the link is time-limited.
 - Sign out.
 - Open the Checker invite link.
 - Sign in or create an account.
 - Open My Events.
 - Accept the same Checker invite twice if possible.
+- Try reusing the same Checker invite link as another non-member user.
 - Repeat the flow with the Host invite link using a different non-member user.
 Pass criteria:
 - Host member/invite management is discoverable from Host UI.
 - Invite survives auth redirect.
 - Both Host and Checker invite links are copyable.
+- Invite links are time-limited and single-use.
 - Checker invite grants Checker role.
 - Checker access is check-in only.
 - Host invite grants Host management access.
+- Reusing an already-used invite does not grant membership and shows a clear safe error.
 - Duplicate memberships are not created.
 
 Scenario 19: My Events
@@ -400,13 +468,17 @@ Pass criteria:
 
 Scenario 23: Gallery upload and approval
 Steps:
+- Reset demo data.
 - Sign in as Maya.
 - Open a past event.
 - Upload or add a photo.
 - Confirm it is Pending and not public.
 - Open an upcoming event and confirm gallery upload is not available before the event ends.
-- Sign in as Jordan.
-- Reach Host Dashboard through visible navigation, then open the gallery approval queue.
+- Sign in as Jordan Lee (`jordan@example.com` / `demo123`), Host of Brightside Collective.
+- Open Host Dashboard (`/host`) or reach it through visible Host navigation.
+- Scroll down far enough to inspect the actual Gallery approval queue item cards, not only the "Gallery approval queue" heading.
+- Locate rendered pending gallery cards and their actions, including Approve and Hide.
+- Compare any pending/gallery queue count shown in the UI with the number of rendered queue cards.
 - Approve the photo.
 - Return to the public event page.
 - Hide a photo.
@@ -414,26 +486,33 @@ Pass criteria:
 - Attendee gallery upload is available after the event ends.
 - Gallery upload is not available for upcoming events.
 - Pending uploads are not public.
+- With seeded demo data, Gallery approval queue renders pending item cards for Brightside Collective.
+- Pending/gallery queue counts are consistent with the number of rendered queue cards after scrolling through the queue area.
 - Host can approve photos.
 - Approved photos become public.
 - Hidden photos disappear publicly.
 
 Scenario 24: Reports and review queue
 Steps:
+- Reset demo data.
 - Sign out.
 - Report a public event with a reason.
 - If a public approved photo is visible while signed out, report that photo with a reason.
 - Sign in as Maya or Priya.
 - Report another event with a reason.
 - Report a visible photo with a reason.
-- Sign in as Jordan.
-- Reach Host Dashboard through visible navigation, then open the report review queue.
+- Sign in as Jordan Lee (`jordan@example.com` / `demo123`), Host of Brightside Collective.
+- Open Host Dashboard (`/host`) or reach it through visible Host navigation.
+- Scroll down far enough to inspect the actual Report review queue item cards, not only the "Report review queue" heading.
+- Locate rendered open report cards and their actions, including Resolve and Hide item.
+- Compare any open/report queue count shown in the UI with the number of rendered queue cards.
 - Resolve one report.
 - Hide one reported item.
 Pass criteria:
 - Reporting is available to any user, including signed-out users, unless the app provides a clearly justified sign-in gate that should be flagged as a task.md risk.
 - Users can report both events and photos.
-- Reports appear in Host review queue.
+- With seeded demo data, Report review queue renders open report cards for Brightside Collective.
+- Open/report queue counts are consistent with the number of rendered queue cards after scrolling through the queue area.
 - Resolve does not hide content.
 - Hide removes reported item from public display.
 - Management views show clear statuses.
@@ -503,10 +582,10 @@ task.md coverage checklist:
 - Host self-serve registration, profile fields, and public Host page: scenarios 14 and 25.
 - Event creation fields, Draft/Published, Public/Unlisted, Publish/Unpublish/Duplicate, Free/Paid disabled: scenarios 7, 14, and 15.
 - Explore filters, public browsing, past events, and social metadata: scenarios 6, 7, and 25.
-- Sign-in/sign-up, RSVP redirect, ticket, QR, calendar, cancellation, My Tickets: scenarios 2 through 12.
-- Capacity enforcement and FIFO waitlist promotion: scenarios 11, 12, and 13.
+- Sign-in/sign-up, RSVP redirect, ticket, QR, calendar, ticket ownership, cancellation, My Tickets: scenarios 2 through 12A.
+- Capacity enforcement and FIFO waitlist promotion: scenarios 11, 12, 12A, and 13.
 - Host/Checker roles, role invites, Host permissions, Checker limitations: scenarios 17, 18, and 19.
-- Host Dashboard stats and CSV export: scenario 16.
+- Host Dashboard stats and CSV export: scenarios 16 and 16A.
 - Check-in counters, duplicate prevention, manual code entry, and undo: scenarios 20 and 21.
 - Feedback, gallery approval, any-user reporting, review queue, and hiding: scenarios 22, 23, and 24.
 - Submission artifacts and seeded deployment requirements: scenario 26.

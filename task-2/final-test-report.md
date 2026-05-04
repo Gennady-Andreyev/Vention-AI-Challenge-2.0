@@ -79,7 +79,7 @@ Golden path result: PASS
 | Event editor | PASS | Required fields, split date/time controls, date validation, publish/unpublish/duplicate, Public/Unlisted, Draft/Published verified |
 | Free/Paid toggle | PASS | Paid visible but disabled with "Coming soon" |
 | Host Dashboard | PASS | Upcoming/Past sections and Going/Waitlist/Checked-in counts verified |
-| CSV export | PASS | Headers match `name,email,RSVP status,check-in time` |
+| CSV export | PASS | Headers match `name,email,RSVP status,check-in time`; populated check-in times are expected as UTC ISO timestamps |
 | Roles and route guards | PASS | Host, Checker, Attendee, and signed-out boundaries verified; Host Dashboard and My Events are discoverable through visible navigation for eligible roles |
 | Invite links | PASS | Invite acceptance after sign-in and duplicate prevention verified |
 | My Events | PASS | Host/date/text filters and role-appropriate actions verified |

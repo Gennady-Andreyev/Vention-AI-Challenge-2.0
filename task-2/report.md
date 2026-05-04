@@ -16,7 +16,7 @@ The `task.md` submission-artifact checklist is covered as follows:
 |-------------------|--------|-------|
 | Shareable public deployed application URL | Done | The Lovable deployment is available at https://gather-event-joy.lovable.app |
 | Seeded Host, upcoming event, and past event | Done | Brightside Collective, Sunset Sketch Walk, and Spring Picnic Potluck are included in the resettable seed data |
-| Example CSV export file with correct schema | Done | `task-2/example-rsvp-export.csv` demonstrates `name,email,RSVP status,check-in time` |
+| Example CSV export file with correct schema | Done | `task-2/example-rsvp-export.csv` demonstrates `name,email,RSVP status,check-in time`; populated check-in times use UTC ISO timestamps |
 | `report.md` covering tools, techniques, what worked, what did not, and notable decisions | Done | This report documents the implementation approach, AI toolchain, QA process, failures, and decisions |
 | Step-by-step README usage guide for Publish -> RSVP -> Ticket -> Check-in | Done | `task-2/README.md` contains the reviewer-facing usage guide |
 | Public GitHub repository with the project in `task-2/` | Ready for final visibility check | The local remote points to `Gennady-Andreyev/Vention-AI-Challenge-2.0`; confirm the GitHub repository is public before final submission |
@@ -34,7 +34,7 @@ Core technical choices:
 - RSVP state is modeled as Going, Waitlisted, and Cancelled.
 - Waitlist promotion is FIFO and triggered by Going cancellation and capacity increases.
 - Tickets use unique ticket codes and QR renderings; check-in accepts manual code entry.
-- CSV export is generated client-side with the required schema.
+- CSV export is generated client-side with the required schema; populated check-in times are represented as timezone-aware UTC ISO timestamps.
 - Calendar export downloads an `.ics` file from the browser.
 - Feedback, gallery photos, reports, and moderation queues are represented in the same seeded client state.
 
@@ -69,6 +69,8 @@ The Claude-driven UI testing covered:
 - Producing concise Lovable bug-fix prompts when behavior failed acceptance criteria.
 
 OpenAI Atlas was then added alongside Claude as a second browser-based QA driver for the updated all-round test pass, with extra focus on the corrected authentication experience: visible email/password sign-in, Create Account, seeded-user credentials, redirect preservation, and removal of primary mock-account shortcuts.
+
+After the functional UI passes, Lovable's internal security scan was run against the generated implementation. That scan found two authorization issues that were not caught by the Claude or Atlas browser testing: cross-user ticket-page access and indefinitely reusable Host invite links. Both were addressed through targeted Lovable follow-up prompts and then treated as regression cases.
 
 This split responsibilities cleanly: Codex produced the requirements-aware prompts and test plans, Lovable implemented the app, Claude extension performed the first independent browser QA pass, and Atlas was used for the follow-up all-round UI validation.
 
@@ -156,6 +158,14 @@ Some browser-preview constraints limited direct inspection of social metadata an
 
 A route-based QA blind spot emerged during later review. AI-driven browser tests could validate Host Dashboard and event-editor behavior by navigating directly to known routes, but that did not prove a real user could discover those flows from the visible UI. In one pass, the Host functionality existed behind routes, while a signed-in non-host user had no obvious navigation affordance to begin Host registration. This made a feature appear implemented under automated route-based QA while remaining effectively unavailable to an ordinary user. The test scenario was updated to require visible navigation discovery before direct-route checks for protected and role-based flows.
 
+The same gotcha appeared a second time in Scenario 18: Host member/invite management. Lovable had implemented parts of the invite concept, but the Host Dashboard did not expose a visible path to member or invite management. From a product standpoint, that means the feature was still missing, because a Host could not discover or use it without route knowledge. This looks like a recurring weakness of AI app generation: the model can produce route-level or state-level functionality while forgetting the navigation affordance that makes it reachable in the actual product.
+
+The issue was caught because the QA harness was prompted to test discoverability before direct-route behavior. The relevant rule is documented in the [Atlas/Claude test scenario](testing-approach.md): "If a feature works by typing a known URL but has no visible UI entry point for the relevant user role, mark it as FAIL." This became one of the most useful QA practices in the project: test what a real user can find first, then test deep links and route guards second.
+
+The initial Lovable implementation also had two security issues that the Claude and Atlas UI passes did not identify. First, the authenticated `/tickets/:ticketCode` route could render another user's ticket details if the requester knew the ticket code. Second, Host invite links had no expiry and could be reused indefinitely. These were not failures of the product requirements; they were over-permissive implementation details outside the happy-path functional scenarios. Lovable's internal security scan flagged both issues after the browser QA passes.
+
+Both findings were fixed through targeted hardening prompts. Ticket pages were changed to owner-only access: signed-out users are redirected to sign-in, the owning attendee can view the ticket, and other signed-in users receive a neutral denied/not-found state without leaking whether the ticket exists. Host invite links were changed to be time-limited and single-use, with token metadata for creation, expiry, use time, and consuming user. Invite acceptance now re-checks the token after sign-in, blocks expired or already-used links, and avoids duplicate memberships.
+
 Real camera scanning was not implemented. The task explicitly states that manual code entry is sufficient, so the implementation focuses on generated QR tickets and robust manual validation.
 
 ## Notable Decisions
@@ -175,6 +185,7 @@ Testing used three layers:
 - Lovable self-checks after implementation and hardening.
 - Independent browser QA with a Claude extension using the requirement-mapped scenario plan.
 - Follow-up all-round browser QA with OpenAI Atlas, focused especially on the updated email/password and Create Account flows.
+- Lovable internal security scan for authorization and token-lifecycle issues that browser happy-path testing could miss.
 - Targeted cross-testing for final risk areas: draft route guards, editor validation, FIFO promotion, invite links, page metadata, and `.ics` export.
 
 The final detailed results are documented in [final-test-report.md](final-test-report.md).

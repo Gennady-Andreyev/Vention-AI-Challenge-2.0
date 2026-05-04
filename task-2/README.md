@@ -106,7 +106,8 @@ Camera scanning is not required for this submission; QR tickets are generated, a
 - Explore supports text search, date range, location filter, Upcoming default, and Include Past.
 - Host Dashboard shows Upcoming and Past events with Going, Waitlist, and Checked-in counts.
 - My Events aggregates events for users with Host or Checker roles and shows role-appropriate actions.
-- Host invite links can grant Host or Checker access.
+- Ticket pages are owner-only; Hosts and Checkers validate ticket codes through the check-in page.
+- Host invite links can grant Host or Checker access and should be time-limited and single-use.
 - Attendees can submit post-event feedback with a 1-5 rating and optional comment.
 - Gallery uploads start Pending and require Host approval before public display.
 - Event and photo reports appear in the Host review queue and can be resolved or hidden.
@@ -120,3 +121,7 @@ The in-app export uses these exact columns:
 ```csv
 name,email,RSVP status,check-in time
 ```
+
+When `check-in time` is populated, it should be exported as a timezone-aware UTC timestamp in ISO 8601 format, for example `2026-05-12T18:08:00.000Z`. Rows for attendees who have not checked in should leave the field blank.
+
+This applies both to seeded check-ins after Reset demo data and to check-ins performed during a review session. Undo last scan should clear the corresponding exported check-in time.
