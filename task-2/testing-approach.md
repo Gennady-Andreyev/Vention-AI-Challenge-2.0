@@ -1,612 +1,366 @@
-# GatherPass UI Test Scenario for Claude and OpenAI Atlas
+# GatherPass Stateful UI Test Scenarios For OpenAI Atlas
 
-This file records the browser QA scenario used with Claude and the updated all-round browser test to run in OpenAI Atlas.
+This file records the browser QA scenarios used for the official stateful Lovable Cloud version of GatherPass.
 
-- Claude browser extension was used earlier as the independent UI test driver for the first full QA pass.
-- OpenAI Atlas is used alongside Claude for the updated all-round pass, especially after the authentication UI correction.
-- The prompt below is written for Atlas, but the scenario matrix is also suitable for any browser-based QA agent.
+Target app:
+https://gather-pass-hub.lovable.app/
+
+The scenarios are split by backend migration checkpoint because the app was easier to validate surface-by-surface than with one large browser pass. Earlier browser-state testing was useful during development, but the official repo now treats the Cloud-backed app as the submission target.
+
+## Testing Rules
+
+- Use visible navigation first; use direct URLs only for route-guard, Unlisted, Draft, ticket privacy, or invite-link checks.
+- Prefer a fresh Atlas session when possible. If only one browser context is available, sign in/out between seeded users and use refreshes to verify shared Cloud persistence.
+- Do not treat CSV content inspection as failed if Atlas can trigger the download but cannot inspect the file. Mark it `NOT VERIFIED`.
+- Do not spend Lovable credits on broad fixes until Atlas identifies a concrete failing flow.
+- Treat small loading shells or delayed role-link flashes as acceptable if they resolve to the correct user/role without manual route recovery.
+- Public reset must remain absent because backend state is shared.
+
+## Seeded Accounts
+
+- `maya@example.com` / `demo123` - attendee
+- `jordan@example.com` / `demo123` - Host
+- `alex@example.com` / `demo123` - Checker
+- `priya@example.com` / `demo123` - attendee
+- `omar@example.com` / `demo123` - attendee
+- `riley@example.com` / `demo123` - attendee
+
+## Checkpoint A: Cloud Auth And Read Layer
 
 ```text
-You are the independent UI test driver for the GatherPass app.
+Test GatherPass as an independent reviewer.
 
-App URL:
-https://gather-event-joy.lovable.app
+Target app:
+https://gather-pass-hub.lovable.app/
 
-Goal:
-Run an all-round browser-only QA pass against the Task 2 requirements. Use only the visible UI. Do not inspect source code. Do not rely on prior Lovable, Codex, Claude, or self-QA reports. Treat this as a fresh organizer/reviewer acceptance test.
+Focus only on Cloud auth and Cloud read-layer behavior. Do not test persistence for RSVP, event create/edit, check-in, invite creation, feedback submission, photo upload, or moderation in this checkpoint.
 
-Important latest requirement focus:
-The app must not rely only on visible mock-user shortcuts. It should provide normal local demo authentication:
-- Sign In form with email + password.
-- Create Account form.
-- Seeded users should sign in like normal users.
-- Demo/reviewer one-click account cards should not be shown unless they are hidden behind non-primary tooling. The main auth UI should not look like a mock.
+Use visible navigation first. Use direct URLs only for route-guard checks.
 
-Seeded user credentials expected after Reset demo data:
-- Maya Chen: maya@example.com / demo123
-- Jordan Lee: jordan@example.com / demo123
-- Alex Rivera: alex@example.com / demo123
-- Priya Shah: priya@example.com / demo123
-- Omar Brooks: omar@example.com / demo123
-- Riley Morgan: riley@example.com / demo123
+Verify:
+1. Signed-out user can browse Explore.
+2. Signed-out user can open a public event page.
+3. Signed-out user can open a known Unlisted published event URL if available.
+4. Draft event direct URL is blocked for signed-out/non-host users.
+5. Jordan can sign in with jordan@example.com / demo123.
+6. Maya can sign in with maya@example.com / demo123.
+7. Alex can sign in with alex@example.com / demo123.
+8. Redirect-after-sign-in works when starting from RSVP or a protected route.
+9. Maya's My Tickets page loads seeded ticket/waitlist data from Cloud.
+10. Jordan's Host Dashboard loads seeded Host/events/counts from Cloud.
+11. Alex's My Events page loads Checker-accessible events from Cloud.
+12. Public reset action is absent.
+13. Footer/UI does not say data persists only in the browser.
+14. Refreshing authenticated routes keeps the user signed in and reloads Cloud data.
+15. Header/profile identity and role navigation update after sign-out and account switching.
+16. No primary route is blank or a placeholder.
 
-Known seeded entities:
-- Host: Brightside Collective.
-- Upcoming open event: /events/e_upcoming_open
-- Upcoming full event: /events/e_upcoming_full
-- Past event.
-- Draft event: /events/e_draft
-- Unlisted event: /events/e_unlisted
-- Host page: /hosts/h_brightside
-- Host Dashboard: /host
-- New Event Editor: /host/events/new
-- My Events: /my-events
+Return:
+- PASS/FAIL by area.
+- Browser/session setup used.
+- Any route that failed.
+- Any visible issue with auth, loading states, route guards, or Cloud read data.
+- Do not mark write persistence as failed in this checkpoint.
+```
 
-Testing rules:
-- Start with Reset demo data.
-- Use the browser UI only.
-- Refresh after important state changes to verify localStorage persistence.
-- Mark placeholder pages, inert buttons, missing feedback, or silent failures as defects.
-- Treat `task.md` as the source of truth. If this prompt and the app disagree with `task.md`, report the app behavior as a risk or bug.
-- Test feature discoverability before testing known routes. For Host registration, Host Dashboard, Event Editor, My Events, Tickets, Check-in, and moderation queues, first try to reach the feature through visible navigation, account menus, contextual CTAs, or page links. Direct URL navigation is allowed only after you verify there is a real UI path, or when a scenario explicitly tests route guards.
-- If a feature works by typing a known URL but has no visible UI entry point for the relevant user role, mark it as FAIL. This is a user-experience availability bug, not a pass.
-- Use unique emails for created accounts, for example atlas.tester+[timestamp]@example.com.
-- If a file download cannot be inspected because of browser restrictions, report the download behavior separately from content inspection.
-- Output concise evidence, not a long narrative.
+## Checkpoint B: RSVP, Tickets, And Waitlist RPCs
 
-Output format:
-1. Overall result: PASS / PARTIAL PASS / FAIL.
-2. A scenario table with columns: Scenario, Result, Evidence, Notes.
-3. A "Blocking bugs" section.
-4. A "Navigation/discoverability gaps" section.
-5. A "Non-blocking risks" section.
-6. For each failed or partial scenario, provide a copy-paste Lovable fix prompt with route, account, steps, expected behavior, actual behavior, persistence result, and minimal requested fix.
+```text
+Test GatherPass as an independent reviewer.
 
-Scenario 1: Initial app and reset
+Target app:
+https://gather-pass-hub.lovable.app/
+
+Focus only on backend RSVP, tickets, and waitlist behavior.
+
+Use:
+- Sunset Sketch Walk for under-capacity Going + ticket.
+- Community Coding Night for full/waitlist.
+
+Seeded accounts:
+- maya@example.com / demo123
+- omar@example.com / demo123
+- riley@example.com / demo123
+- jordan@example.com / demo123 as Host
+
+Verify:
+1. Signed-out RSVP redirects to sign-in and returns to the event page.
+2. Under-capacity RSVP on Sunset succeeds.
+3. Attendee becomes Going.
+4. Ticket is visible.
+5. Refresh preserves Going/ticket.
+6. Host Dashboard counts reflect the Going RSVP after signing in as Jordan.
+7. Full-event RSVP on Community Coding Night creates Waitlisted state.
+8. Waitlisted attendee has no confirmed ticket.
+9. Refresh preserves Waitlisted state.
+10. Canceling a Going RSVP promotes the oldest Waitlisted attendee FIFO if the setup is available.
+11. Draft event RSVP remains blocked/rejected.
+12. Past event RSVP is hidden or rejected.
+13. Ticket page remains owner-only.
+14. Public reset action remains absent.
+15. No route becomes blank.
+
+Known migration gotchas to watch:
+- An RSVP button can render correctly while the RPC still fails.
+- Under-capacity RSVP exercises ticket generation; full-event waitlist does not.
+- If under-capacity RSVP fails but waitlist works, inspect backend ticket-code generation and RPC error logs.
+
+Return:
+- PASS/FAIL by item.
+- Evidence that RSVP/waitlist state persisted after refresh.
+- Evidence that host counts saw backend state.
+- Any blocking issue only.
+```
+
+## Checkpoint C: Host Event Editor Writes
+
+```text
+Retest only Host Event Editor write persistence.
+
+Target app:
+https://gather-pass-hub.lovable.app/
+
+Use:
+- jordan@example.com / demo123
+
 Steps:
-- Open the app URL.
-- Use Reset demo data.
-- Confirm `/` lands on or redirects to Explore.
-- Refresh.
-Pass criteria:
-- Explore is the first useful screen.
-- Reset restores the seeded app state.
-- Refresh does not break the session or seed.
+1. Sign in as Jordan.
+2. Open Host Dashboard.
+3. Click New Event.
+4. Fill:
+   - Title: Atlas Cloud Smoke [current time]
+   - Description: Temporary Atlas smoke test event for Cloud persistence.
+   - Start date: 2026-06-01
+   - Start time: 18:00
+   - End date: 2026-06-01
+   - End time: 20:00
+   - Timezone: America/Los_Angeles
+   - Venue: Atlas Test Hall
+   - Capacity: 12
+   - Cover image URL: use the default helper if present, otherwise paste:
+     https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=1200&q=70&auto=format&fit=crop
+   - Visibility: Public
+   - Pricing: Free
+5. Save draft.
+6. Refresh Host Dashboard and confirm the draft persists.
+7. Open the draft and publish it.
+8. Sign out, open Explore, confirm the event appears.
+9. Sign in as Jordan, unpublish it.
+10. Sign out, open Explore, confirm the event no longer appears.
+11. Sign in as Jordan, duplicate an existing event.
+12. Refresh Host Dashboard and confirm the duplicate persists as Draft.
 
-Scenario 2: Auth UI is real sign-in/sign-up, not mock shortcuts
-Steps:
-- Open `/signin`.
-- Inspect the page before signing in.
-Pass criteria:
-- A normal Sign In form is visible with email and password fields.
-- A Create Account mode/form is available.
-- There is no large visible "Demo accounts" section with no-password one-click user cards.
-- If demo helpers exist, they are not the primary auth experience and do not make the page look like a mock.
+Return PASS/FAIL only for:
+- Full draft creation persists.
+- Publish persists and appears in Explore.
+- Unpublish persists and disappears from Explore.
+- Duplicate persists as Draft.
+- Any validation/input issue remaining.
+```
 
-Scenario 3: Create Account validation
-Steps:
-- Open `/signin`.
-- Switch to Create Account.
-- Try empty fields.
-- Try invalid email.
-- Try password shorter than 6 characters.
-- Try mismatched password confirmation.
-Pass criteria:
-- Each invalid state shows visible error feedback.
-- The form does not silently fail.
-- No invalid user is created.
+## Checkpoint D: Remaining Backend Write Flows
 
-Scenario 4: Create Account success and persistence
-Steps:
-- Create a user:
-  - Full name: Atlas Tester
-  - Email: atlas.tester+[timestamp]@example.com
-  - Password: testpass123
-- Confirm the user is signed in.
-- Refresh.
-- Sign out.
-- Sign in again with the same email/password.
-- Try creating another account with the same email.
-Pass criteria:
-- New user is created in local demo state.
-- New user is signed in immediately after creation.
-- Session and user persist after refresh.
-- Email/password sign-in works after sign-out.
-- Duplicate email is rejected with visible feedback.
+```text
+Continue backend write-flow testing for GatherPass.
 
-Scenario 5: Sign In validation and seeded credentials
-Steps:
-- Sign out.
-- Try unknown email.
-- Try known email with wrong password.
-- Sign in as Maya with maya@example.com / demo123.
-- Sign out.
-- Sign in as Jordan with jordan@example.com / demo123.
-- Sign out.
-- Sign in as Alex with alex@example.com / demo123.
-Pass criteria:
-- Unknown email and wrong password show visible errors.
-- Seeded users authenticate through email/password.
-- Sign-out works.
-- No one-click account switching is required.
+Target app:
+https://gather-pass-hub.lovable.app/
 
-Scenario 6: Public browsing and Explore filters
-Steps:
-- Sign out.
-- Open Explore.
-- Confirm Upcoming is default.
-- Use text search.
-- Use location filter.
-- Use date range filter.
-- Enable Include Past.
+Already passed:
+- RSVP/ticket/waitlist backend writes.
+- Host event create/publish/unpublish/duplicate persistence.
+
+Do not retest those except where needed for check-in.
+
+Use seeded accounts:
+- jordan@example.com / demo123 - Host
+- alex@example.com / demo123 - Checker
+- maya@example.com / demo123 - Attendee
+- omar@example.com / demo123 - Attendee
+- riley@example.com / demo123 - Attendee
+
+Test these remaining write surfaces:
+
+1. Capacity increase promotion
+- As Jordan, open Community Coding Night if it has waitlisted users.
+- Increase capacity.
+- Confirm oldest waitlisted attendee is promoted FIFO and gets Going/ticket.
+- Refresh and confirm promotion persists.
+
+2. CSV export
+- As Jordan, export RSVPs/attendance for an event.
+- If download content is inspectable, confirm exact headers:
+  name,email,RSVP status,check-in time
+- If not inspectable, report NOT VERIFIED, not FAIL.
+
+3. Check-in
+- Find a valid Going ticket code.
+- Sign in as Alex.
+- Open My Events -> Check-in.
+- Enter valid code.
+- Confirm check-in succeeds and counters update.
+- Refresh and confirm check-in persists.
+- Enter same code again; confirm duplicate is blocked.
+- Undo last check-in; refresh; confirm undo persists.
+- Try invalid code; rejected.
+- If available, try waitlisted/cancelled code; rejected.
+
+4. Invites
+- Sign in as Jordan.
+- Create a Checker or Host invite link.
+- Sign in as an attendee without that role.
+- Accept invite.
+- Confirm role access appears after acceptance.
+- Sign out/in or refresh and confirm role persists.
+- Try reusing same invite link; confirm it is rejected.
+
+5. Feedback
+- Sign in as Maya.
 - Open a past event.
-Pass criteria:
-- Signed-out users can browse public published events.
-- Filters change results appropriately.
-- Past events appear when Include Past is enabled.
-- Past event pages show Ended and hide RSVP.
+- Submit or update 1-5 star feedback with a short comment.
+- Refresh and confirm it persists.
 
-Scenario 7: Public, draft, and unlisted visibility
-Steps:
-- Sign out.
-- Confirm public events appear in Explore.
-- Confirm `/events/e_unlisted` works by direct link.
-- Confirm `/events/e_draft` does not expose event details or RSVP.
-- Sign in as Maya and open `/events/e_draft`.
-- Sign in as Alex and open `/events/e_draft`.
-- Sign in as Jordan and open `/events/e_draft`.
-Pass criteria:
-- Draft events are hidden from signed-out users, attendees, and checkers.
-- Only owning Host can preview/manage draft.
-- Unlisted event is hidden from Explore but reachable by direct link.
-
-Scenario 8: Signed-out RSVP redirect with sign-in
-Steps:
-- Reset demo data.
-- Sign out.
-- Open `/events/e_upcoming_open`.
-- Click RSVP.
-- Confirm redirect to `/signin?redirect=/events/e_upcoming_open`.
-- Sign in as Maya with email/password.
-Pass criteria:
-- User returns to the original event page after sign-in.
-- RSVP can be completed without manually finding the event again.
-
-Scenario 9: Signed-out RSVP redirect with account creation
-Steps:
-- Reset demo data.
-- Sign out.
-- Open `/events/e_upcoming_open`.
-- Click RSVP.
-- Create a new account from the redirected sign-in page.
-- Return to the event and RSVP.
-- Open My Tickets.
-Pass criteria:
-- Create Account preserves redirect.
-- New user can RSVP.
-- New user gets a ticket and can see it in My Tickets.
-
-Scenario 10: RSVP under capacity, ticket, QR, and calendar
-Steps:
-- Reset demo data.
-- Sign in as Maya.
-- Open `/events/e_upcoming_open`.
-- RSVP.
-- Open the ticket.
-- Click Add to Calendar.
-- Refresh and open My Tickets.
-Pass criteria:
-- RSVP status becomes Going.
-- Unique ticket code and QR are shown.
-- Ticket code is unique compared with other visible seeded or newly created ticket codes.
-- `.ics` download is triggered.
-- Ticket persists after refresh.
-- My Tickets shows all upcoming Going tickets for the signed-in user, not only the newest one.
-
-Scenario 10A: Ticket ownership and direct ticket URL access
-Steps:
-- Reset demo data.
-- Sign in as Maya.
-- RSVP to `/events/e_upcoming_open` if needed.
-- Open Maya's ticket and copy the ticket URL or ticket code.
-- Sign out.
-- Open Maya's ticket URL while signed out.
-- Sign in as Priya and open Maya's ticket URL.
-- Sign in as Omar and open Maya's ticket URL.
-- Sign in as Alex and open Maya's ticket URL.
-- Sign in as Jordan and open Maya's ticket URL.
-- Sign back in as Maya and open Maya's ticket URL.
-Pass criteria:
-- Signed-out ticket URL access redirects to sign-in with redirect preserved.
-- Only Maya can view Maya's ticket.
-- Other signed-in users see a neutral denied/not-found state.
-- The denied state does not leak attendee name, email, QR code, event-specific ticket details, or whether the ticket code exists.
-- Hosts and Checkers validate codes through the check-in page, not through owner ticket pages.
-
-Scenario 11: Full event waitlist
-Steps:
-- Reset demo data.
-- Sign in as Priya or a new attendee not already Going.
-- Open `/events/e_upcoming_full`.
-- RSVP if not already waitlisted.
-- Open My Tickets.
-Pass criteria:
-- Full event does not exceed capacity.
-- User is Waitlisted, not ticketed as Going.
-- Waitlist state is visible in My Tickets.
-
-Scenario 12: FIFO promotion after cancellation
-Steps:
-- Reset demo data.
-- Use the full event with Omar Going and Priya/Riley waitlisted.
-- Sign in as Omar and cancel the Going RSVP.
-- Sign in as Priya.
-- Check the event and My Tickets.
-- Sign in as Riley.
-- Check the event and My Tickets.
-Pass criteria:
-- A Going attendee can cancel their RSVP from the event or ticket flow.
-- Priya is promoted before Riley.
-- Priya has Going status and ticket/promotion notice.
-- Riley remains Waitlisted.
-- Counts stay valid.
-
-Scenario 12A: Runtime waitlist promotion after cancellation and login notification
-Steps:
-- Reset demo data.
-- Sign in as Jordan and create or edit a future Public Published event with capacity `1`. Use visible UI only.
-- Sign out.
-- Sign in as user A, preferably Maya, and RSVP to the event. Confirm user A is Going and has a ticket.
-- Sign out.
-- Sign in as user B, preferably Priya, and RSVP to the same event. Confirm user B is Waitlisted and does not have a confirmed ticket.
-- Sign out user B before the cancellation happens.
-- Sign in as user A and cancel the RSVP from the event page, ticket page, or My Tickets.
-- Sign out user A.
-- Sign in again as user B.
-- Check the first screen after login, My Tickets, and the event detail page.
-Pass criteria:
-- The event never exceeds capacity.
-- User B is automatically promoted from Waitlisted to Going after user A cancels.
-- User B receives a ticket after promotion.
-- User B sees an in-app promotion notification/banner/message on login or in My Tickets. It must be visible without typing a direct route or inspecting localStorage.
-- User B is no longer shown as Waitlisted for that event.
-- User A's cancelled RSVP no longer counts as Going.
-- The promotion is persisted after refresh.
-
-Scenario 13: FIFO promotion after capacity increase
-Steps:
-- Reset demo data.
+6. Gallery
+- As attendee, add/upload a gallery photo.
+- Confirm it starts Pending and is not public.
 - Sign in as Jordan.
-- Edit/manage `/events/e_upcoming_full`.
-- Increase capacity by 1 and save.
-- Sign in as Priya and check status.
-- Sign in as Riley and check status.
-Pass criteria:
-- Priya is promoted before Riley.
-- Priya has ticket or promotion notice.
-- Riley remains Waitlisted.
-- Dashboard/event counts update and persist after refresh.
+- Approve it.
+- Refresh/public view confirms it appears.
+- Hide it.
+- Refresh/public view confirms it disappears.
 
-Scenario 14: Host registration as a new user
-Steps:
-- Sign in as the Atlas-created user or create a fresh user.
-- Starting from the normal signed-in UI, find the visible path to Host registration. Check the top navigation, profile/account menu, empty states, and relevant page CTAs. Do not type a known Host registration URL unless you first find a visible entry point.
-- Open Host registration through that visible UI path.
-- Create a Host profile with name, logo/avatar, short bio, and contact email.
-- Open the new public Host page.
-- From the visible Host UI, find the New Event/Create Event action. Do not type the event editor URL unless the UI path exists.
-- Create a new event.
-- Save as Draft.
-- Publish it.
-- From visible navigation, open Host Dashboard for the new Host.
-Pass criteria:
-- A signed-in non-host user has a visible, understandable way to start Host registration.
-- Any signed-in user can register as Host.
-- New Host profile persists with name, logo/avatar, short bio, and contact email.
-- Public Host page displays the Host profile and published events.
-- A newly registered Host has visible navigation to create events and reach the Host Dashboard.
-- New Host can create and publish a Public or Unlisted free event.
-- New event can be managed from Host Dashboard.
-
-Scenario 15: Event editor validation and lifecycle
-Steps:
+7. Reports
+- As attendee, report an event or photo.
 - Sign in as Jordan.
-- Starting from the normal signed-in UI, reach Host Dashboard through visible navigation or account/menu affordances. Do not type `/host` as the first step.
-- From Host Dashboard, use the visible New Event/Create Event action to open the event editor. Do not type `/host/events/new` unless you have already verified the visible action exists.
-- Confirm the editor exposes fields for title, description, start date/time, end date/time, timezone, venue address or online link, capacity, cover image, Public/Unlisted visibility, Draft/Published state, and Free/Paid.
-- Try saving/publishing with empty required fields.
-- Try end date/time before start date/time.
-- Create a valid draft with all required event fields completed.
-- Publish, Unpublish, and Duplicate it.
-- Check Free/Paid toggle.
-Pass criteria:
-- Jordan has a visible UI path to Host Dashboard and New Event.
-- The editor includes every field required by `task.md`.
-- Visible validation appears for empty and invalid date fields.
-- Draft, Publish, Unpublish, and Duplicate work.
-- Duplicate creates a Draft copy.
-- Public published events are searchable in Explore.
-- Unlisted published events are hidden from Explore but reachable by direct link.
-- Paid is visible but disabled with "Coming soon" explanation.
+- Confirm report appears in Host review queue.
+- Resolve or hide it.
+- Refresh and confirm moderation state persists.
 
-Scenario 16: Host Dashboard and CSV export
-Steps:
-- Sign in as Jordan.
-- Starting from Explore or another normal signed-in page, find and use the visible UI path to Host Dashboard. Do not type `/host` unless you have already verified the visible entry point exists.
-- Inspect Upcoming and Past event sections.
-- Export CSV for an event.
-Pass criteria:
-- A Host user can discover and open Host Dashboard from the visible UI.
-- Event cards/rows show Going, Waitlist, Checked-in counts.
-- CSV download is triggered.
-- If content can be inspected, headers are exactly: name, email, RSVP status, check-in time.
-- If content can be inspected, rows include attendee name, email, RSVP status, and blank or populated check-in time in a spreadsheet-safe comma-separated format.
-- Populated check-in times are timezone-aware UTC ISO timestamps ending in `Z`, for example `2026-05-12T18:08:00.000Z`.
-- Seeded initial check-ins export non-empty UTC check-in times.
-
-Scenario 16A: Runtime check-in CSV timestamp and undo consistency
-Steps:
-- Reset demo data.
-- Sign in as Maya.
-- RSVP to `/events/e_upcoming_open` if needed and copy Maya's ticket code.
-- Sign in as Alex or Jordan.
-- Open the check-in page through visible UI.
-- Enter Maya's ticket code and confirm successful check-in.
-- Sign in as Jordan if not already Host.
-- Export CSV for the checked-in event.
-- Inspect the downloaded CSV if the browser allows it.
-- Return to the check-in page and use Undo last scan.
-- Export CSV for the same event again.
-Pass criteria:
-- Runtime check-in creates a persisted check-in timestamp.
-- Maya's exported `check-in time` is non-empty after check-in.
-- The timestamp is timezone-aware UTC ISO ending in `Z`.
-- Undo last scan clears Maya's exported `check-in time`.
-- Counters and CSV stay consistent after refresh.
-
-Scenario 17: Roles and route guards
-Steps:
-- Sign out and try `/host`, `/my-events`, and check-in route.
-- Sign in as Maya and try the same protected routes.
-- Sign in as Alex and find My Events/check-in through visible navigation before trying direct routes.
-- Sign in as Jordan and find Host Dashboard through visible navigation before trying direct routes.
-Pass criteria:
-- Signed-out users are redirected to sign-in.
-- Attendee cannot access Host/Checker protected actions.
-- Attendee UI should still provide a visible Host registration path, because any signed-in user can register as a Host.
-- Checker can discover My Events/check-in from visible UI.
-- Checker can access check-in only.
+8. Permissions
+- Attendee cannot access Host Dashboard, check-in, or moderation.
 - Checker cannot edit events, export CSV, or manage Host Dashboard.
-- Host can discover Host Dashboard from visible UI.
-- Host can access management actions.
+- Public reset action remains absent.
+- No primary route is blank.
 
-Scenario 18: Invite links after auth
-Steps:
-- Reset demo data.
-- Sign in as Jordan.
-- Reach Host member/invite management through visible Host UI navigation.
-- Generate/copy a Checker invite link.
-- Generate/copy a Host invite link.
-- Confirm each generated invite shows an expiry or otherwise communicates that the link is time-limited.
-- Sign out.
-- Open the Checker invite link.
-- Sign in or create an account.
-- Open My Events.
-- Accept the same Checker invite twice if possible.
-- Try reusing the same Checker invite link as another non-member user.
-- Repeat the flow with the Host invite link using a different non-member user.
-Pass criteria:
-- Host member/invite management is discoverable from Host UI.
-- Invite survives auth redirect.
-- Both Host and Checker invite links are copyable.
-- Invite links are time-limited and single-use.
-- Checker invite grants Checker role.
-- Checker access is check-in only.
-- Host invite grants Host management access.
-- Reusing an already-used invite does not grant membership and shows a clear safe error.
-- Duplicate memberships are not created.
+Return:
+- PASS/FAIL/NOT VERIFIED by item.
+- For failures only: account, route, steps, expected, actual, and refresh result.
+- Keep the report concise.
+```
 
-Scenario 19: My Events
-Steps:
-- Sign in as Alex.
-- Open My Events through visible navigation. Do not type `/my-events` unless the UI path has already been verified.
-- Use Host filter.
-- Use date range filter.
-- Use text search.
-- Inspect actions.
-- Repeat as Jordan.
-Pass criteria:
-- My Events is visible to Host/Checker users.
-- My Events is discoverable from visible navigation for users with roles.
-- Filters work.
-- Checker sees check-in actions only.
-- Host sees edit/dashboard/export/check-in actions.
+## Checkpoint E: Final Post-Security Regression
 
-Scenario 20: Check-in happy path
-Steps:
-- Reset demo data.
-- Sign in as Maya.
-- RSVP to `/events/e_upcoming_open` if needed and copy the ticket code.
-- Sign in as Alex.
-- Open check-in for that event.
-- Enter Maya's ticket code.
-- Refresh.
-Pass criteria:
-- Valid Going ticket checks in successfully.
-- Counters update.
-- Recent scans show the successful scan.
-- Check-in persists after refresh.
+```text
+Run final post-security regression QA for GatherPass.
 
-Scenario 21: Check-in error cases and undo
-Steps:
-- Sign in as Alex.
-- Enter the same code again.
-- Enter an invalid code.
-- Enter a waitlisted ticket code if visible.
-- Enter a cancelled ticket code if visible.
-- Undo the last successful scan.
-Pass criteria:
-- Duplicate check-in is blocked.
-- Invalid code is rejected.
-- Waitlisted and Cancelled tickets are rejected.
-- Undo removes only the last successful check-in and updates counters.
+Target app:
+https://gather-pass-hub.lovable.app/
 
-Scenario 22: Post-event feedback
-Steps:
-- Sign in as Maya.
-- Open a past event.
-- Try submitting feedback without rating.
-- Submit 1-5 star rating with optional comment.
-- Refresh.
-- Open an upcoming event.
-Pass criteria:
-- Feedback appears only for past events.
-- Rating is required.
-- Comment is optional.
-- Feedback persists.
-- Upcoming event does not show feedback form.
+Context:
+Lovable Cloud backend migration is complete. Security hardening changed RLS/function grants:
+- feedback is no longer public-readable; author or event Host can read it
+- invite table is not public-readable; invite acceptance uses backend RPC
+- mutation RPCs are authenticated-only
+- public_profiles is public-safe; profiles is owner-only
+- public reset action is absent
 
-Scenario 23: Gallery upload and approval
-Steps:
-- Reset demo data.
-- Sign in as Maya.
-- Open a past event.
-- Upload or add a photo.
-- Confirm it is Pending and not public.
-- Open an upcoming event and confirm gallery upload is not available before the event ends.
-- Sign in as Jordan Lee (`jordan@example.com` / `demo123`), Host of Brightside Collective.
-- Open Host Dashboard (`/host`) or reach it through visible Host navigation.
-- Scroll down far enough to inspect the actual Gallery approval queue item cards, not only the "Gallery approval queue" heading.
-- Locate rendered pending gallery cards and their actions, including Approve and Hide.
-- Compare any pending/gallery queue count shown in the UI with the number of rendered queue cards.
-- Approve the photo.
-- Return to the public event page.
-- Hide a photo.
-Pass criteria:
-- Attendee gallery upload is available after the event ends.
-- Gallery upload is not available for upcoming events.
-- Pending uploads are not public.
-- With seeded demo data, Gallery approval queue renders pending item cards for Brightside Collective.
-- Pending/gallery queue counts are consistent with the number of rendered queue cards after scrolling through the queue area.
-- Host can approve photos.
-- Approved photos become public.
-- Hidden photos disappear publicly.
+Use visible navigation first. Use direct URLs only for route/security checks.
 
-Scenario 24: Reports and review queue
-Steps:
-- Reset demo data.
-- Sign out.
-- Report a public event with a reason.
-- If a public approved photo is visible while signed out, report that photo with a reason.
-- Sign in as Maya or Priya.
-- Report another event with a reason.
-- Report a visible photo with a reason.
-- Sign in as Jordan Lee (`jordan@example.com` / `demo123`), Host of Brightside Collective.
-- Open Host Dashboard (`/host`) or reach it through visible Host navigation.
-- Scroll down far enough to inspect the actual Report review queue item cards, not only the "Report review queue" heading.
-- Locate rendered open report cards and their actions, including Resolve and Hide item.
-- Compare any open/report queue count shown in the UI with the number of rendered queue cards.
-- Resolve one report.
-- Hide one reported item.
-Pass criteria:
-- Reporting is available to any user, including signed-out users, unless the app provides a clearly justified sign-in gate that should be flagged as a task.md risk.
-- Users can report both events and photos.
-- With seeded demo data, Report review queue renders open report cards for Brightside Collective.
-- Open/report queue counts are consistent with the number of rendered queue cards after scrolling through the queue area.
-- Resolve does not hide content.
-- Hide removes reported item from public display.
-- Management views show clear statuses.
+Seeded accounts:
+- jordan@example.com / demo123 - Host
+- alex@example.com / demo123 - Checker
+- maya@example.com / demo123 - Attendee
+- omar@example.com / demo123 - Attendee
+- riley@example.com / demo123 - Attendee
 
-Scenario 25: Metadata, persistence, and responsive pass
-Steps:
-- Navigate through Explore -> event detail -> Host page -> My Tickets -> Host Dashboard -> Check-in.
-- Check browser title changes for Event and Host pages.
-- Inspect or infer `meta[name="description"]` for Event and Host pages if Atlas can access page metadata.
-- Resize to mobile width and repeat key flows: sign-in, RSVP, ticket, check-in.
-- Refresh after several state changes.
-Pass criteria:
-- Event and Host pages use specific page titles and metadata if inspectable.
-- If metadata is not inspectable in Atlas, mark only metadata inspection as inconclusive and continue testing visible behavior.
-- Mobile layout remains usable.
-- Text does not overlap or spill.
-- Important actions show success/error feedback.
-- Refresh preserves relevant local state.
+Verify core flows:
+1. Signed-out Explore works.
+2. Signed-out public event detail works.
+3. Signed-out Unlisted event direct URL works.
+4. Draft event direct URL is blocked for signed-out/non-host users.
+5. Jordan can still open Host Dashboard.
+6. Alex can still open My Events and Check-in.
+7. Maya/Omar/Riley cannot access Host Dashboard, check-in, or moderation.
 
-Scenario 26: Submission artifact and seed checklist
-Steps:
-- Confirm the deployed app URL is reachable.
-- Confirm Reset demo data includes at least one Host, one upcoming event, and one past event.
-- Confirm the repository/package being reviewed includes `task-2/README.md`, `task-2/report.md`, and an example CSV export artifact if Atlas has repo access.
-- If Atlas does not have repo access, mark repository artifact inspection as not testable from browser UI.
-Pass criteria:
-- Public deployed URL works.
-- Seed contains at least one Host, one upcoming event, and one past event.
-- Repository artifacts are present if inspectable: usage guide README, report.md, and example CSV with required schema.
-- Missing repository artifact access should be reported as "not inspectable", not as an app failure.
+Verify RSVP/tickets:
+8. Under-capacity RSVP still creates Going + ticket and persists after refresh.
+9. Full-event RSVP still creates Waitlisted and no confirmed ticket.
+10. Ticket page is owner-only; another attendee cannot view someone else's ticket.
 
-Scenario 27: Reset cleanup
-Steps:
-- Create a local user.
-- Sign in as that local user.
-- Use Reset demo data.
-- Try signing in again with the local user's credentials.
-- Sign in as seeded Maya with maya@example.com / demo123.
-Pass criteria:
-- Reset restores original seed.
-- Locally created users are removed or clearly reset according to app behavior.
-- If current user was removed, app signs out cleanly.
-- Seeded credentials work after reset.
+Verify Host/event writes:
+11. Jordan can create/save a draft event with full valid fields; refresh persists.
+12. Publish makes it appear in Explore; unpublish removes it.
+13. Duplicate persists as Draft.
+14. Capacity increase still promotes waitlist FIFO if applicable.
 
-Golden path smoke test:
-Run this at the end:
-1. Reset demo data.
-2. Browse Explore signed out.
-3. Open `/events/e_upcoming_open`.
-4. Click RSVP signed out.
-5. Sign in as Maya with maya@example.com / demo123.
-6. Confirm return to event.
-7. RSVP and view ticket.
-8. Click Add to Calendar.
-9. Sign out and sign in as Alex with alex@example.com / demo123.
-10. Open My Events -> Check-in.
-11. Enter Maya's ticket code.
-12. Confirm counters update.
-13. Enter same code again.
-14. Confirm duplicate is blocked.
-15. Undo last scan.
-16. Confirm counters roll back.
+Verify check-in:
+15. Alex can check in a valid Going ticket.
+16. Duplicate check-in is blocked.
+17. Undo check-in persists after refresh.
+18. Invalid/waitlisted/cancelled ticket code is rejected if available.
 
-Golden path passes only if no hidden setup, manual route recovery, or one-click mock login is required.
+Verify invites:
+19. Jordan can create a Host or Checker invite.
+20. A signed-in attendee can accept it and gain role access.
+21. Reusing the same invite fails safely.
+22. Invite token data is visible only to the Host for copy/share, not exposed publicly.
 
-task.md coverage checklist:
-- Host self-serve registration, profile fields, and public Host page: scenarios 14 and 25.
-- Event creation fields, Draft/Published, Public/Unlisted, Publish/Unpublish/Duplicate, Free/Paid disabled: scenarios 7, 14, and 15.
-- Explore filters, public browsing, past events, and social metadata: scenarios 6, 7, and 25.
-- Sign-in/sign-up, RSVP redirect, ticket, QR, calendar, ticket ownership, cancellation, My Tickets: scenarios 2 through 12A.
-- Capacity enforcement and FIFO waitlist promotion: scenarios 11, 12, 12A, and 13.
-- Host/Checker roles, role invites, Host permissions, Checker limitations: scenarios 17, 18, and 19.
-- Host Dashboard stats and CSV export: scenarios 16 and 16A.
-- Check-in counters, duplicate prevention, manual code entry, and undo: scenarios 20 and 21.
-- Feedback, gallery approval, any-user reporting, review queue, and hiding: scenarios 22, 23, and 24.
-- Submission artifacts and seeded deployment requirements: scenario 26.
+Verify feedback/gallery/reports after security hardening:
+23. Maya can submit/update feedback on a past event; refresh persists.
+24. Jordan as Host can see relevant feedback for his event.
+25. Public/signed-out event pages still render correctly even if feedback is restricted.
+26. Maya can add/upload a gallery photo; it starts Pending and is not public.
+27. Jordan can approve it; approved photo appears publicly.
+28. Jordan can hide it; hidden photo disappears publicly.
+29. Maya can report an event or photo.
+30. Jordan can see the report in the Host review queue after security hardening.
+31. Jordan can resolve or hide the reported item; refresh persists.
 
-Lovable bug prompt template for failures:
+Other:
+32. CSV export button still triggers download. If headers cannot be inspected, mark NOT VERIFIED, not FAIL.
+33. Public reset action remains absent.
+34. No primary route is blank.
+35. No UI says data persists only in browser.
 
-Fix only this issue in GatherPass. Do not redesign unrelated screens, replace the localStorage architecture, introduce backend services, or change working flows.
+Return:
+- PASS/FAIL/NOT VERIFIED by section, not long prose.
+- Any blocking issue with account, route, steps, expected, actual, refresh result.
+- Note any issue caused by the new RLS/security hardening.
+```
+
+## Lovable Bug Prompt Template
+
+```text
+Fix only this confirmed issue in the stateful GatherPass app. Do not redesign unrelated screens, change routes, or refactor broad areas. Preserve the existing Lovable Cloud architecture and working flows.
+
+Target app:
+https://gather-pass-hub.lovable.app/
 
 Failed Atlas UI test:
-- Scenario:
+- Checkpoint:
 - Route tested:
 - Account used:
 - Starting state:
 - Steps to reproduce:
 - Expected behavior:
 - Actual behavior:
-- Refresh persistence result:
+- Refresh/cross-user persistence result:
+- Console/backend error if visible:
+
+Scope:
+- Fix the smallest reliable cause.
+- Do not reintroduce browser-local app-data writes.
+- Do not touch unrelated write flows.
+- Keep existing UI text and layout unless the failure is UI-specific.
 
 Acceptance test:
 - Starting from [route], signed in as [user], when I [action], the app should [result].
 - Refresh the page and verify the result persists where relevant.
+- If another role/user should observe the result, sign in as that user and verify it.
 
-Make the smallest reliable fix and add clear visible success/error feedback where relevant.
+Report back with:
+1. Root cause.
+2. Files/RPCs/policies changed.
+3. Manual test result.
+4. Any remaining blocker.
 ```

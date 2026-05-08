@@ -4,101 +4,102 @@
 
 Final status: PASS
 
-GatherPass passed the golden reviewer path, Lovable's final self-check, and an independent Claude browser-extension QA pass. OpenAI Atlas was added alongside Claude for the updated all-round browser test pass after the authentication UI correction. Later UI review found a route-discoverability issue in the Host flow; the app was rechecked after correction. The final hardening pass addressed the main review risks: draft event direct URL access, event editor validation, FIFO waitlist promotion, invite acceptance, page metadata, `.ics` export, auth UX, and Host navigation discoverability.
+GatherPass passed the final stateful backend QA pass against the Lovable Cloud deployment. The app supports shared backend persistence across users/sessions, seeded Cloud auth accounts, public browsing, RSVP/ticket/waitlist flows, Host event management, Checker check-in, invites, feedback, gallery moderation, report moderation, and role boundaries.
 
-Application under test: https://gather-event-joy.lovable.app
+Application under test: https://gather-pass-hub.lovable.app/
 
 Test method:
 
 - Browser-based black-box testing through the deployed app.
-- Lovable code-level self-check for implementation paths that were difficult to inspect in the browser sandbox.
-- Targeted regression checks after each reported issue.
-- Reset demo data used to restore the canonical state before destructive scenarios.
+- OpenAI Atlas used as the independent UI test driver.
+- Sign-in/sign-out across seeded users used where a second isolated browser context was unavailable.
+- Refresh checks used to confirm backend persistence.
+- Lovable security scan used for RLS/function-grant hardening.
+- Targeted regression checks after each confirmed blocker.
 
 ## Test Environment
 
 | Item | Value |
 |------|-------|
 | App | GatherPass |
-| Deployment | https://gather-event-joy.lovable.app |
-| Data mode | Seeded localStorage demo state |
-| Auth mode | Local demo email/password auth with seeded credentials and Create Account |
-| Primary QA drivers | Claude browser extension and OpenAI Atlas |
+| Deployment | https://gather-pass-hub.lovable.app/ |
+| Data mode | Lovable Cloud shared backend state |
+| Auth mode | Lovable Cloud email/password auth with seeded credentials |
+| Primary QA driver | OpenAI Atlas |
 | Implementation driver | Lovable |
-| Prompt/documentation support | OpenAI Codex, GPT-5.5 with extra-high reasoning/intelligence configuration |
-| Test date | 2026-05-04 |
+| Prompt/documentation support | OpenAI Codex |
+| Test date | 2026-05-08 |
 
 ## Demo Accounts Used
 
 | Account | Role | Primary validation use |
 |---------|------|------------------------|
-| Maya Chen | Attendee | RSVP, tickets, feedback, gallery upload |
-| Jordan Lee | Host | Publishing, dashboard, export, moderation |
+| Maya Chen | Attendee | RSVP, tickets, feedback, gallery upload, reports |
+| Jordan Lee | Host | Publishing, dashboard, export, invites, moderation |
 | Alex Rivera | Checker | My Events and manual check-in |
-| Priya Shah | Attendee | First waitlisted attendee |
-| Omar Brooks | Attendee | Seeded full-event Going RSVP |
-| Riley Morgan | Attendee | Later waitlisted attendee and edge cases |
-
-## Golden Reviewer Path
-
-| # | Step | Result | Evidence |
-|---|------|--------|----------|
-| 1 | Reset demo data | PASS | Reset action produced success feedback and restored seeded data |
-| 2 | Browse Explore signed out | PASS | Public published events visible; draft and unlisted events hidden |
-| 3 | Open upcoming event | PASS | Sunset Sketch Walk loaded from Explore |
-| 4 | RSVP while signed out | PASS | Redirected to sign-in with event redirect parameter |
-| 5 | Sign in as Maya and return | PASS | Returned to original event page |
-| 6 | RSVP and view ticket | PASS | Going RSVP produced unique ticket code and QR display |
-| 7 | Add to Calendar | PASS | `.ics` download triggered |
-| 8 | Sign in as Alex Rivera | PASS | Checker account authenticated with seeded credentials |
-| 9 | My Events -> Check-in | PASS | Checker route available for Alex |
-| 10 | Enter Maya's ticket code | PASS | Check-in succeeded |
-| 11 | Counters update | PASS | Going, Checked-in, Remaining counters updated |
-| 12 | Enter same code again | PASS | Duplicate check-in blocked |
-| 13 | Undo last scan | PASS | Last check-in removed and counters rolled back |
-
-Golden path result: PASS
+| Priya Shah | Attendee | Waitlist and promotion checks |
+| Omar Hassan | Attendee | RSVP/waitlist checks |
+| Riley Morgan | Attendee | Invite acceptance and edge cases |
 
 ## Requirement Coverage Results
 
 | Area | Result | Notes |
 |------|--------|-------|
-| Public browsing and Explore filters | PASS | Signed-out browsing, search, location, date range, Upcoming default, Include Past verified |
-| Event visibility | PASS | Public events discoverable; unlisted works by direct link; drafts hidden from public users |
-| Past event behavior | PASS | Past events show Ended and hide RSVP |
-| Social metadata | PASS | Event and Host pages set specific title/meta; Host metadata restoration hardened |
-| RSVP redirect | PASS | Signed-out RSVP returns user to original event after sign-in |
-| RSVP under capacity | PASS | Going RSVP and ticket created |
-| RSVP over capacity | PASS | Waitlisted state shown; no confirmed ticket for waitlisted user |
-| FIFO promotion after cancellation | PASS | Promotion logic and seeded ordering verified |
-| FIFO promotion after capacity increase | PASS | Priya promoted before Riley in seeded full-event flow |
-| Tickets and QR | PASS | Ticket code and QR display generated for confirmed attendees |
-| Add to Calendar | PASS | `.ics` download includes title, dates, timezone hint, and location/link |
-| My Tickets | PASS | Going tickets and Waitlisted events displayed distinctly |
-| Host registration/profile | PASS | Host profile and public Host page verified; signed-in non-host user has visible "Become a host" entry point |
-| Event editor | PASS | Required fields, split date/time controls, date validation, publish/unpublish/duplicate, Public/Unlisted, Draft/Published verified |
-| Free/Paid toggle | PASS | Paid visible but disabled with "Coming soon" |
-| Host Dashboard | PASS | Upcoming/Past sections and Going/Waitlist/Checked-in counts verified |
-| CSV export | PASS | Headers match `name,email,RSVP status,check-in time`; populated check-in times are expected as UTC ISO timestamps |
-| Roles and route guards | PASS | Host, Checker, Attendee, and signed-out boundaries verified; Host Dashboard and My Events are discoverable through visible navigation for eligible roles |
-| Invite links | PASS | Invite acceptance after sign-in and duplicate prevention verified |
-| My Events | PASS | Host/date/text filters and role-appropriate actions verified |
-| Check-in | PASS | Manual code entry, duplicate prevention, invalid/waitlisted/cancelled rejection, undo verified |
-| Feedback | PASS | Past-event-only form with required 1-5 rating verified |
-| Gallery moderation | PASS | Pending, Approved, Hidden states and Host approval verified |
-| Reports | PASS | Event/photo report queue and hide/resolve actions verified |
-| Persistence | PASS | localStorage persistence and Reset demo data verified |
-| Responsiveness/no placeholders | PASS | Primary routes functional on reviewed layouts; no placeholder primary routes found |
+| Public browsing and Explore | PASS | Signed-out Explore and public event detail pages worked |
+| Event visibility | PASS | Unlisted direct URL worked; Draft direct URL was blocked for non-hosts |
+| Seeded Cloud reads | PASS | My Tickets, My Events, and Host Dashboard loaded seeded Cloud data |
+| Auth/session persistence | PASS | Refresh preserved authenticated sessions after the auth-loading fix |
+| Role navigation | PASS | Host/Checker/Attendee navigation resolved correctly after sign-in/sign-out |
+| RSVP redirect | PASS | Signed-out RSVP redirected to sign-in and returned to the event |
+| RSVP under capacity | PASS | Going RSVP and ticket were created and persisted |
+| RSVP at capacity | PASS | Full event created Waitlisted state with no confirmed ticket |
+| FIFO waitlist promotion | PASS | Capacity increase promotion remained FIFO where waitlist setup was available |
+| Ticket privacy | PASS | Ticket page was owner-only; another attendee was denied |
+| Add to Calendar / QR | PASS | Ticket page exposed QR/ticket code and calendar flow |
+| Host Dashboard | PASS | Host data, event counts, and management actions loaded from Cloud |
+| Event editor writes | PASS | Draft creation, publish, unpublish, and duplicate persisted across refresh |
+| CSV export | NOT VERIFIED | Button triggered download; Atlas environment could not inspect file contents reliably. Repository CSV artifact has required headers |
+| My Events | PASS | Checker and Host role views worked with role-appropriate actions |
+| Check-in | PASS | Valid Going ticket check-in succeeded; duplicate blocked; undo persisted |
+| Invalid/non-confirmed check-in codes | NOT VERIFIED | Not reliably testable in final Atlas pass due to code availability/UI re-renders |
+| Invites | PASS | Host/Checker invite creation worked; acceptance granted role; reuse failed safely |
+| Feedback | PASS | Attendee feedback on past event persisted; Host could view relevant feedback |
+| Gallery moderation | PASS | Upload started Pending; Host approval made photo public; hiding removed it |
+| Reports | PASS | Reports appeared in Host queue and resolve/hide persisted |
+| Permissions | PASS | Attendees could not access Host/check-in/moderation; Checker could not manage Host dashboard |
+| Public reset action | PASS | No public reset action was visible |
+| Browser-local copy | PASS | No UI copy claimed data persisted only in the browser |
+| No placeholder routes | PASS | Primary tested routes rendered functional content or expected denied states |
 
-## Issues Found and Resolution
+## Golden Reviewer Path
+
+| # | Step | Result | Evidence |
+|---|------|--------|----------|
+| 1 | Browse Explore signed out | PASS | Public published events visible |
+| 2 | Open event detail signed out | PASS | Event detail page rendered and RSVP prompted sign-in |
+| 3 | Sign in as attendee and RSVP | PASS | RSVP created Going state or Waitlisted state depending on capacity |
+| 4 | View ticket | PASS | Confirmed attendee saw ticket code and QR |
+| 5 | Refresh attendee page | PASS | RSVP/ticket state persisted from Cloud |
+| 6 | Sign in as Host | PASS | Host Dashboard reflected shared RSVP/event counts |
+| 7 | Sign in as Checker | PASS | My Events and check-in actions were available |
+| 8 | Enter valid ticket code | PASS | Check-in succeeded and counters updated |
+| 9 | Enter same code again | PASS | Duplicate check-in was blocked |
+| 10 | Undo last check-in | PASS | Undo persisted across refresh |
+
+Golden path result: PASS
+
+## Issues Found And Resolution
 
 | Issue | Severity | Resolution |
 |-------|----------|------------|
-| Draft event direct URL exposed draft details and RSVP to signed-in non-host users | High | Fixed by guarding Draft event details so only the owning Host can preview/manage drafts |
-| Event Editor failed silently when required fields were empty | Medium | Fixed with visible validation for required fields and end-before-start date ordering |
-| Host registration and Host Dashboard were route-addressable but not discoverable from visible UI for the relevant user state | High | Fixed by exposing Host registration from the signed-in user menu and Host Dashboard/New Event from Host navigation |
-| Host page metadata did not restore as consistently as Event page metadata | Low | Hardened title/meta update and cleanup behavior |
-| `.ics` timezone visibility could be clearer | Low | Added explicit timezone hint through calendar export metadata |
+| Refresh on protected routes treated loading auth as signed-out | High | Added auth readiness/loading behavior before redirect decisions |
+| Role-based navigation stale after switching users | Medium | Cleared user-scoped state on sign-out and refetched memberships after sign-in |
+| First-time RSVP could fail because PostgreSQL `FOUND` was overwritten by an aggregate query | High | Replaced implicit `FOUND` dependency with explicit existing-row flag |
+| Ticket creation failed because `gen_random_bytes` was unavailable | High | Changed ticket code generation to use `gen_random_uuid`-based randomness |
+| Event Editor blocked valid draft creation due to fragile date/time/capacity/URL input state | High | Hardened local date construction, error clearing, capacity state, cover URL handling, and Host ID validation |
+| Feedback rows were publicly readable after initial RLS setup | High | Restricted feedback SELECT to author or event Host |
+| Internal helper functions were callable too broadly | Medium | Revoked public/authenticated execution where helpers should only run internally |
+| Invite token enumeration risk | Medium | Kept invite acceptance behind backend RPC and no public invite SELECT-by-token policy |
 
 No open blocking issues remain.
 
@@ -106,11 +107,12 @@ No open blocking issues remain.
 
 | Risk | Status | Mitigation |
 |------|--------|------------|
-| Browser-local demo state | Accepted | Required flows are resettable and deterministic |
 | No camera QR scanning | Accepted | Task allows manual code entry; QR ticket is still generated |
-| Single seeded Host | Accepted | Requirement asks for at least one Host; role model supports additional demo flows |
-| Metadata and `.ics` file inspection in iframe | Accepted | Verified through targeted Lovable checks and browser behavior |
+| Paid events disabled | Accepted | Paid option is visible and disabled with explanatory tooltip |
+| Single seeded Host | Accepted | Requirement asks for at least one Host; role model supports adding more |
+| CSV content inspection in Atlas | Accepted | Download triggered; repository includes schema-correct CSV artifact |
+| Some negative check-in code cases not reproduced in final Atlas pass | Accepted | Core check-in, duplicate prevention, and undo passed; backend validation flow exists |
 
 ## Conclusion
 
-GatherPass meets the Task 2 functional requirements and repository-local submission artifact requirements. The deployed app includes the required seeded Host, upcoming event, past event, RSVP/ticket/check-in flows, host operations, moderation flows, and CSV schema. Before final handoff, confirm that the GitHub repository is publicly visible. The final QA result is PASS.
+GatherPass meets the Task 2 functional requirements and repository-local submission artifact requirements as a stateful Lovable Cloud application. The deployed app includes the required seeded Host, upcoming event, past event, RSVP/ticket/check-in flows, host operations, moderation flows, role boundaries, shared backend persistence, and CSV schema artifact.

@@ -1,4 +1,17 @@
-# Lovable Prompt Pack for Task 2
+# GatherPass Lovable Prompt History
+
+This file preserves the full Lovable prompting path for Task 2. The official deployed submission is the stateful Lovable Cloud app at https://gather-pass-hub.lovable.app/.
+
+The work happened in two major stages:
+
+1. A browser-state prototype was built first to make the full product surface reviewable quickly.
+2. That working app was then remixed and migrated to Lovable Cloud so users, events, RSVPs, tickets, check-ins, invites, feedback, gallery items, and reports became shared across sessions.
+
+## Part 1: Browser-State Prototype Prompt Pack
+
+The prompts below created the initial working GatherPass prototype. They are retained as development history, not as the current submission target.
+
+### Original Prototype Pack Intro
 
 Use these prompts in order inside Lovable. The goal is to build GatherPass as a complete, seeded, reviewable demo app with minimal rework.
 
@@ -425,3 +438,409 @@ Use this quick checklist before deploying:
 - Reports appear in review queue and hide/resolve works.
 - My Events respects Host vs Checker quick actions.
 - Demo seed includes one Host, one upcoming event, one past event, one draft event, and one unlisted event.
+
+## Part 2: Stateful Lovable Cloud Migration Prompt Pack
+
+The prompts below converted the working prototype into the official stateful submission.
+
+The migration prompts below were used after the prototype was working.
+
+Target app:
+https://gather-pass-hub.lovable.app/
+
+## Context
+
+GatherPass first reached a working state as a browser-state prototype. The official submission is now the Lovable Cloud version. These prompts document the migration path: preserve the working UI and product behavior, then replace browser-local application data with shared backend persistence.
+
+Key goals:
+
+- Use Lovable Cloud only: database, auth, storage where useful, backend/RPC functions, logs, and security checks.
+- Do not use a custom backend server, external Supabase project, payments, or a redesign.
+- Preserve current routes, navigation, visual style, and review flows.
+- Make users, hosts, events, RSVPs, tickets, check-ins, invites, feedback, gallery photos, and reports shared across users/sessions.
+- Remove any public reset action because backend reset would affect all users.
+- Use OpenAI Atlas browser as the independent UI test driver.
+
+## Prompt 0: Migration Brief, No Implementation Yet
+
+```text
+GatherPass is already fully implemented as a Lovable app. This is not a new build. We are extending the existing solution by converting it from browser-local prototype persistence to a shared stateful Lovable Cloud backend.
+
+Official target:
+https://gather-pass-hub.lovable.app/
+
+Goal:
+Make users, hosts, events, RSVPs, tickets, check-ins, invites, feedback, gallery photos, and reports persist in Lovable Cloud so changes made by one user/browser/session are visible to other users/sessions.
+
+Preserve the current app:
+- Do not rebuild from scratch.
+- Do not redesign the UI.
+- Do not change the core route map.
+- Do not remove working flows.
+- Keep Explore, Event pages, Host pages, My Tickets, My Events, Host Dashboard, Event Editor, Check-in, feedback, gallery, reports, invites, CSV export, QR tickets, and Add to Calendar.
+- Keep the practical event-operations feel.
+
+Use Lovable Cloud only:
+- Lovable Cloud database
+- Lovable Cloud auth
+- Lovable Cloud storage only where useful for uploaded images
+- Lovable Cloud backend/RPC functions for race-prone mutations
+- Lovable Cloud logs/security checks
+
+Do not use:
+- external Supabase project
+- custom backend server
+- payments
+- route restructuring
+- a new product direction
+
+Important implementation facts:
+- The previous app used browser-scoped state; the stateful version must replace it with Cloud data.
+- It has seeded users: Maya, Jordan, Alex, Priya, Omar, Riley.
+- It has seeded Host Brightside Collective.
+- It has seeded events covering upcoming open, upcoming full, past, draft, and unlisted states.
+- It has a public reset action that must be removed for the stateful backend version.
+
+Before implementing, inspect the current app structure and reply with:
+1. The current state/auth provider or equivalent state layer you found.
+2. The exact Cloud tables you intend to create.
+3. The backend functions or transaction-safe mutations you intend to create.
+4. Which UI pieces should remain frontend-only.
+5. The migration risks.
+6. A short phase plan.
+
+Do not implement yet.
+```
+
+## Prompt 1: Cloud Schema, Auth, And Seed Data
+
+```text
+Implement the Lovable Cloud foundation for the existing GatherPass app.
+
+Official target:
+https://gather-pass-hub.lovable.app/
+
+This is an extension of the current working app, not a rebuild. Preserve the existing UI, routes, page structure, visual style, and feature behavior while adding Lovable Cloud persistence.
+
+Create Cloud tables with appropriate IDs, timestamps, foreign keys, indexes, uniqueness constraints, and enum/check constraints:
+
+- profiles: private user profile; id linked to auth user id; name; email; avatar; timestamps.
+- public_profiles: public-safe mirror with id, name, avatar only.
+- hosts: name, avatar, bio, contact_email, created_by, timestamps.
+- host_members: host_id, user_id, role Host or Checker, timestamps, unique host_id + user_id.
+- events: host_id, title, description, start_at, end_at, timezone, venue, online_link, capacity, cover_image_url, visibility Public or Unlisted, status Draft or Published, pricing Free, category, created_by, timestamps.
+- rsvps: event_id, user_id, status Going/Waitlisted/Cancelled, created_at, cancelled_at, promoted_at, promotion_acknowledged.
+- tickets: event_id, user_id, unique code, qr_payload, created_at, unique event_id + user_id.
+- check_ins: event_id, ticket_code, user_id, checked_in_by, checked_in_at, unique ticket_code.
+- invites: token, host_id, invite_type, role, created_at, expires_at, used_at, used_by_user_id.
+- feedback: event_id, user_id, rating 1-5, comment, created_at, unique event_id + user_id.
+- gallery_photos: event_id, user_id, image_url, caption, status Pending/Approved/Hidden, timestamps.
+- reports: target_type Event or Photo, target_id, reporter_id, reason, status, timestamps.
+
+Add SECURITY DEFINER helpers for RLS where needed, avoiding recursive policies.
+
+Create seeded review accounts if Lovable Cloud auth supports it:
+- maya@example.com / demo123
+- jordan@example.com / demo123
+- alex@example.com / demo123
+- priya@example.com / demo123
+- omar@example.com / demo123
+- riley@example.com / demo123
+
+If auth users cannot be seeded automatically, stop after creating the schema and tell me exactly which users to create manually in the Cloud Users UI before continuing.
+
+Seed the canonical demo dataset:
+- Host: Brightside Collective
+- Jordan Lee is Host
+- Alex Rivera is Checker
+- One upcoming public event with capacity remaining
+- One upcoming public full event with waitlist
+- One past public event
+- One draft event
+- One unlisted published event
+- Seeded Going, Waitlisted, Cancelled RSVP states
+- Seeded ticket codes
+- At least one checked-in ticket
+- Feedback, gallery photos, and one open report
+
+Do not redesign UI. After implementing, summarize created tables, seeded records, RLS intent, and any manual user setup required.
+```
+
+## Prompt 2: Replace State And Auth Wiring
+
+```text
+Replace the existing GatherPass browser-local app state with Lovable Cloud data while preserving existing app behavior.
+
+Official target:
+https://gather-pass-hub.lovable.app/
+
+This is a state-layer migration. Do not rebuild pages from scratch. Keep the component-facing behavior of the current state/provider/hooks as stable as possible, but make shared application data come from Lovable Cloud.
+
+Remove dependency on browser-scoped application state. Keep only harmless local UI preferences if any.
+
+Auth:
+- Replace prototype email/password checking with Lovable Cloud auth.
+- Keep email/password sign-in and Create Account.
+- Preserve redirect behavior after sign-in.
+- Create or update the profiles row after signup/sign-in when needed.
+- Signed-out users can browse Explore and public event/host pages.
+
+Remove:
+- Public reset button/action.
+- Footer or UI copy claiming data persists only in the browser.
+
+Public reads:
+- Explore loads Published Public events from Cloud.
+- Event detail loads Published events, including Unlisted events by direct URL.
+- Draft events are visible only to Host members for that event's Host.
+- Host pages load public Host profile and published events.
+
+Shared state:
+- Ensure changes from other sessions become visible after mutation, navigation, refresh, or realtime subscription.
+- Prefer realtime subscriptions for core shared tables if Lovable Cloud supports them cleanly.
+
+Acceptance tests:
+- Sign in with seeded accounts.
+- Sign out and browse Explore.
+- Open public event details signed out.
+- Refresh authenticated routes and confirm auth/session persistence.
+- Confirm public reset is no longer available.
+
+After implementing, provide a report-ready summary of the state/auth migration.
+```
+
+## Prompt 3: Backend RSVP, Tickets, And Waitlist
+
+```text
+Convert RSVP, ticketing, and waitlist behavior to safe backend-backed mutations.
+
+Official target:
+https://gather-pass-hub.lovable.app/
+
+Keep the current UI and user flows. Move only the persistence and race-prone state transitions to Lovable Cloud/backend logic.
+
+Implement backend RPCs or transaction-safe database mutations for:
+- rsvp_to_event(event_id)
+- cancel_rsvp(event_id)
+- promote_waitlist(event_id)
+- update_event_capacity(event_id, new_capacity)
+
+Rules:
+- RSVP requires authenticated user.
+- Upcoming Published events only.
+- If Going count is below capacity, create Going RSVP and a unique ticket.
+- If capacity is full, create Waitlisted RSVP and no confirmed ticket.
+- Prevent duplicate active RSVP by the same user for the same event.
+- Canceling a Going RSVP sets status to Cancelled and promotes the oldest Waitlisted attendee FIFO.
+- Increasing capacity promotes waitlisted attendees FIFO until capacity is filled.
+- Promotion sets promoted_at and creates a ticket if needed.
+- Ticket codes must be globally unique and stable.
+- Waitlisted and Cancelled users cannot access confirmed ticket pages.
+
+Keep:
+- Existing ticket page design.
+- Existing QR display.
+- Existing Add to Calendar behavior.
+- Existing My Tickets page split between Going tickets and Waitlisted events.
+
+Acceptance tests:
+- RSVP under capacity creates Going status and ticket.
+- RSVP at capacity creates Waitlisted status.
+- Cancel Going RSVP and confirm the first waitlisted attendee is promoted.
+- Increase capacity as Host and confirm FIFO promotion.
+- Confirm owner-only ticket access still holds.
+
+After implementing, provide a report-ready summary of backend RSVP/ticket/waitlist decisions and tests.
+```
+
+## Prompt 4: Backend Host, Roles, Check-In, And Moderation
+
+```text
+Convert Host operations, roles, check-in, feedback, gallery, reports, and invites to Lovable Cloud persistence.
+
+Official target:
+https://gather-pass-hub.lovable.app/
+
+Do not rebuild the pages. Preserve current navigation, role-specific visible actions, route guards, feedback, and status messaging. Move shared state and permission-sensitive mutations to Cloud.
+
+Host operations:
+- Host registration creates hosts and host_members rows.
+- Event editor creates/updates events in Cloud.
+- Publish, Unpublish, Duplicate, and capacity increase work with backend state.
+- CSV export reads Cloud RSVPs/check-ins and keeps exact headers:
+  name,email,RSVP status,check-in time
+
+Roles:
+- Host role can manage events, dashboard, exports, invites, gallery approval, and reports.
+- Checker role can access check-in only.
+- Attendees and signed-out users cannot access protected Host/Checker actions.
+- My Events aggregates events for Host/Checker memberships from Cloud.
+
+Invites:
+- Host can create Host or Checker invite links.
+- Invite tokens are single-use and expiring.
+- Signed-out invite visitors are sent to sign-in and returned to accept the invite.
+- Prevent duplicate membership rows.
+
+Check-in:
+- Implement check_in_ticket(event_id, ticket_code) as a backend function.
+- Implement undo_check_in(check_in_id) as a backend function.
+- Valid Going ticket for the event succeeds.
+- Duplicate check-in is blocked.
+- Invalid, Waitlisted, Cancelled, and wrong-event tickets are rejected.
+- Counters update from Cloud state.
+
+Feedback/gallery/reports:
+- Feedback allowed only after event end and from authenticated attendees.
+- Gallery uploads create Pending rows.
+- Approved photos are public; Pending/Hidden are not public.
+- Hosts can approve/hide photos.
+- Reports create Cloud rows and appear in Host review queue.
+- Hosts can resolve/hide reported items.
+
+Acceptance tests:
+- Host creates/publishes event; another signed-out session sees it in Explore.
+- Checker sees check-in only, not Host management.
+- Manual check-in updates counters and persists after refresh.
+- Duplicate/invalid/waitlisted/cancelled codes are rejected.
+- Invite acceptance works after sign-in and cannot be reused.
+- Gallery/report moderation persists across sessions.
+
+After implementing, provide a report-ready summary of role, check-in, and moderation migration.
+```
+
+## Prompt 5: RLS, Security Scan, And Final Hardening
+
+```text
+Harden the Lovable Cloud backend with Row Level Security and run Lovable security checks.
+
+Official target:
+https://gather-pass-hub.lovable.app/
+
+RLS policy intent:
+- Public/anon can read published public Host/Event information needed for browsing.
+- Public/anon can read Published Unlisted event details by direct link, but Unlisted events are not listed in Explore.
+- Draft events are readable only by Host members for the event's Host.
+- Authenticated users can read/update their own profile.
+- Public profile display uses public_profiles only, with no email exposure.
+- Attendees can read only their own RSVPs and ticket details.
+- Ticket pages are owner-only and must not leak another user's ticket details.
+- Hosts can manage rows for Hosts where they have Host role.
+- Checkers can read only the event/check-in data needed for assigned Host check-in.
+- Feedback writes require authenticated eligible users; reads are limited to author or relevant Host.
+- Gallery Approved photos are public; Pending/Hidden are restricted to uploader or Host.
+- Reports are restricted to relevant Hosts.
+- Invite acceptance must not expose unnecessary token details.
+
+Security requirements:
+- No service-role key in frontend code.
+- No client-side bypass for Host/Checker permissions.
+- Race-prone actions remain backend/transaction-safe.
+- Expired or used invite tokens cannot be accepted.
+- Direct route tests should match visible UI permissions.
+
+Run Lovable's security scan after applying policies. Fix all critical/high findings and any medium finding related to auth, RLS, ticket privacy, invites, feedback privacy, or Host/Checker permissions.
+
+Acceptance tests:
+- Signed-out public browsing works.
+- Attendee cannot access Host Dashboard, check-in, other users' tickets, draft events, or moderation queues.
+- Checker cannot edit/export/manage Host dashboard.
+- Host can manage only their Host.
+- Used/expired invite links fail safely.
+- Two-session shared-state tests still pass after RLS.
+
+After implementing, provide a report-ready security and hardening summary.
+```
+
+## Prompt 6: Atlas Final QA Pass
+
+```text
+Run a final requirement-by-requirement QA pass on GatherPass.
+
+Target app:
+https://gather-pass-hub.lovable.app/
+
+Use OpenAI Atlas browser as the independent UI test driver. Test as a real reviewer first:
+- Prefer visible navigation and user-discoverable flows before direct URL checks.
+- If a feature works only by typing a known URL but has no visible entry point for the relevant role, mark it as FAIL.
+- Use at least two sessions, windows, or browser contexts where possible to prove backend state is shared across users.
+
+Test scenarios:
+1. Signed-out user browses Explore and event detail pages.
+2. Seeded attendee signs in and RSVPs.
+3. Host sees RSVP/dashboard counts update from shared backend data.
+4. Attendee views owner-only ticket.
+5. Checker checks in ticket manually.
+6. Host and attendee sessions reflect check-in state.
+7. Duplicate check-in is blocked.
+8. Undo last check-in persists and updates counters.
+9. Host creates/publishes an event and another session sees it.
+10. Draft and Unlisted behavior remains correct.
+11. FIFO waitlist promotion works after cancellation and capacity increase.
+12. CSV export still uses exact required headers.
+13. Feedback, gallery approval, reports, and invite acceptance persist across sessions.
+14. Public reset action is absent.
+
+Security and regression checks:
+- Attendee cannot access Host Dashboard, check-in page, other users' tickets, draft events, or moderation queue.
+- Checker cannot edit events, export CSV, or manage Host dashboard.
+- Host cannot manage unrelated Host data if multiple Hosts exist.
+- Used or expired invite links fail safely.
+- No primary route still depends on browser-local app state.
+- No UI copy says data is browser-local.
+- No placeholder pages.
+
+Return:
+- PASS/FAIL by feature area.
+- Atlas session setup used.
+- Evidence of shared backend state.
+- Any blocking issues.
+- Any known limitations.
+- A concise report-ready paragraph explaining why the app is stateful.
+```
+
+## Atlas Bug-Fix Prompt Template
+
+```text
+Fix only this confirmed issue in the stateful GatherPass app. Do not redesign unrelated screens, change routes, or refactor broad areas. Preserve the existing Lovable Cloud architecture and working flows.
+
+Target app:
+https://gather-pass-hub.lovable.app/
+
+Failed Atlas UI test:
+- Checkpoint:
+- Route tested:
+- Account used:
+- Starting state:
+- Steps to reproduce:
+- Expected behavior:
+- Actual behavior:
+- Refresh/cross-user persistence result:
+- Console/backend error if visible:
+
+Scope:
+- Fix the smallest reliable cause.
+- Do not reintroduce browser-local app-data writes.
+- Do not touch unrelated write flows.
+- Keep existing UI text and layout unless the failure is UI-specific.
+
+Acceptance test:
+- Starting from [route], signed in as [user], when I [action], the app should [result].
+- Refresh the page and verify the result persists where relevant.
+- If another role/user should observe the result, sign in as that user and verify it.
+
+Report back with:
+1. Root cause.
+2. Files/RPCs/policies changed.
+3. Manual test result.
+4. Any remaining blocker.
+```
+
+## Report Notes Extracted From The Migration
+
+- The official app is stateful and deployed at https://gather-pass-hub.lovable.app/.
+- The browser-state prototype was useful for quickly proving the flow, but backend persistence was required for multi-user/session behavior.
+- Shared entities moved into Lovable Cloud tables, and prototype auth was replaced with Cloud auth plus profiles.
+- Race-prone flows such as RSVP capacity enforcement, FIFO waitlist promotion, check-in, undo check-in, and invite acceptance moved to backend mutations.
+- Public reset was removed because backend reset would affect every user/session.
+- OpenAI Atlas browser was used as the independent UI driver for shared-state validation and visible-navigation-first QA.

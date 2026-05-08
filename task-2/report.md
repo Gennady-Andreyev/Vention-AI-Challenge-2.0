@@ -2,79 +2,48 @@
 
 ## Overview
 
-GatherPass is a Lovable-generated seeded demo application for running free community events end to end. It covers public event discovery, Host publishing, RSVP capacity handling, FIFO waitlists, QR tickets, manual check-in, CSV export, post-event feedback, gallery approval, and reporting.
+GatherPass is a Lovable Cloud application for running free community events end to end. It covers public event discovery, Host publishing, RSVP capacity handling, FIFO waitlists, QR tickets, manual check-in, CSV export, post-event feedback, gallery approval, reporting, and role-based Host/Checker workflows.
 
-The submission was optimized for deterministic review. A reviewer can open the deployed app, reset demo data, switch between seeded accounts, and exercise the full Publish -> RSVP -> Ticket -> Check-in flow without creating a database, connecting payments, configuring real authentication, or relying on external services.
+Official deployment: https://gather-pass-hub.lovable.app/
 
-Deployment: https://gather-event-joy.lovable.app
+The current submission is the stateful version. Users, hosts, events, RSVPs, tickets, check-ins, invites, feedback, gallery photos, and reports are stored in Lovable Cloud so changes made by one user/session are visible to other users/sessions. The development path, however, started with a browser-state prototype and then evolved into this backend-backed version.
 
 ## Submission Artifact Status
 
-The `task.md` submission-artifact checklist is covered as follows:
-
 | Required artifact | Status | Notes |
 |-------------------|--------|-------|
-| Shareable public deployed application URL | Done | The Lovable deployment is available at https://gather-event-joy.lovable.app |
-| Seeded Host, upcoming event, and past event | Done | Brightside Collective, Sunset Sketch Walk, and Spring Picnic Potluck are included in the resettable seed data |
-| Example CSV export file with correct schema | Done | `task-2/example-rsvp-export.csv` demonstrates `name,email,RSVP status,check-in time`; populated check-in times use UTC ISO timestamps |
+| Shareable public deployed application URL | Done | https://gather-pass-hub.lovable.app/ |
+| Seeded Host, upcoming event, and past event | Done | Brightside Collective, Sunset Sketch Walk, and Spring Picnic Potluck are included in the Cloud seed data |
+| Example CSV export file with correct schema | Done | `task-2/example-rsvp-export.csv` demonstrates `name,email,RSVP status,check-in time` |
 | `report.md` covering tools, techniques, what worked, what did not, and notable decisions | Done | This report documents the implementation approach, AI toolchain, QA process, failures, and decisions |
 | Step-by-step README usage guide for Publish -> RSVP -> Ticket -> Check-in | Done | `task-2/README.md` contains the reviewer-facing usage guide |
-| Public GitHub repository with the project in `task-2/` | Ready for final visibility check | The local remote points to `Gennady-Andreyev/Vention-AI-Challenge-2.0`; confirm the GitHub repository is public before final submission |
+| Public GitHub repository with the project in `task-2/` | Done | https://github.com/Gennady-Andreyev/Vention-AI-Challenge-2.0/tree/main/task-2 |
 
 ## Technical Approach
 
-The solution uses a client-side seeded demo architecture. Lovable generated the application code and deployment, while the repository documents the prompting, QA strategy, and submission artifacts.
+The implementation approach had two stages. First, Lovable was used to create a complete browser-state prototype that covered the whole product surface quickly. Then that working app was remixed and migrated to Lovable Cloud, preserving the UI and route structure while replacing local application state with shared backend persistence.
+
+The final implementation uses Lovable Cloud as the backend layer while preserving the application experience created in Lovable. The UI remains a practical event-operations tool with Explore, event pages, Host Dashboard, Event Editor, My Tickets, My Events, check-in, invites, feedback, gallery, and report moderation.
 
 Core technical choices:
 
-- Runtime state is backed by `localStorage`, with a Reset demo data action restoring the canonical seed.
-- Authentication is represented by local demo email/password sign-in plus Create Account, rather than production auth.
-- Role behavior is modeled through seeded Host and Checker memberships.
-- Event visibility is modeled with Draft/Published and Public/Unlisted fields.
-- RSVP state is modeled as Going, Waitlisted, and Cancelled.
-- Waitlist promotion is FIFO and triggered by Going cancellation and capacity increases.
-- Tickets use unique ticket codes and QR renderings; check-in accepts manual code entry.
-- CSV export is generated client-side with the required schema; populated check-in times are represented as timezone-aware UTC ISO timestamps.
-- Calendar export downloads an `.ics` file from the browser.
-- Feedback, gallery photos, reports, and moderation queues are represented in the same seeded client state.
+- Lovable Cloud Auth is used for email/password sign-in and seeded review accounts.
+- Shared application data is stored in Cloud tables: `profiles`, `public_profiles`, `hosts`, `host_members`, `events`, `rsvps`, `tickets`, `check_ins`, `invites`, `feedback`, `gallery_photos`, and `reports`.
+- Row-level security separates public browsing, attendee-owned data, Host access, Checker access, owner-only tickets, and moderation queues.
+- RSVP capacity, ticket issuance, cancel-and-promote, capacity promotion, check-in, undo check-in, invite creation, invite acceptance, and Host registration use backend RPCs where permission or race-safety matters.
+- Simpler writes such as event metadata, feedback, gallery metadata, and report creation use direct Cloud writes protected by RLS.
+- Gallery uploads use a Cloud storage bucket with public display controlled by `gallery_photos.status`.
+- A public reset action is intentionally absent because the app now uses shared backend state.
+- CSV export keeps the required schema: `name,email,RSVP status,check-in time`.
+- Calendar export and QR rendering remain browser-side features.
 
-This architecture is intentionally not a production backend architecture. It is a challenge-review architecture: deterministic, resettable, and directly inspectable by reviewers.
+## Initial Browser-State Prototype
 
-## AI Toolchain and Prompt Engineering
+The first implementation goal was to make the entire challenge surface usable in Lovable with minimal setup. Codex helped turn `task.md` into a phased Lovable prompt pack, and Lovable generated a seeded app that could be reviewed immediately through the browser.
 
-Lovable was the primary implementation environment. It generated and deployed the GatherPass app from structured prompts.
+That first prototype used seeded accounts, seeded events, and browser-scoped state. It included the key roles and flows: Attendee, Host, Checker, Explore, Event detail, RSVP, waitlist, QR ticket, My Tickets, Host Dashboard, Event Editor, CSV export, invites, My Events, check-in, feedback, gallery moderation, and reports.
 
-OpenAI Codex was used to produce the Lovable prompts, QA prompts, and repository submission artifacts. Codex was used with the GPT-5.5 model and an extra-high reasoning/intelligence configuration for the planning and documentation work. The workflow used two collaboration modes:
-
-- Plan Mode for requirements decomposition, prompt sequencing, architecture decisions, and QA plan design.
-- Default Mode for writing repository artifacts after the plan was approved.
-
-Codex was used for:
-
-- Extracting the requirement surface from `task.md`.
-- Converting the task into phased Lovable prompts.
-- Designing acceptance tests for each Lovable phase.
-- Creating Claude browser-extension and OpenAI Atlas QA prompts.
-- Drafting and maintaining the repository documentation and CSV artifact.
-
-The Claude browser extension was used as the first independent UI test driver. Instead of treating Lovable's own implementation summary as sufficient proof, the Claude extension was given a structured QA brief and asked to operate the deployed app through the browser. This made the test process closer to an organizer or reviewer exercising the submission manually.
-
-The Claude-driven UI testing covered:
-
-- Navigating the deployed app as signed-out user, Attendee, Host, and Checker.
-- Resetting seeded localStorage data before destructive flows.
-- Executing the golden path from Explore to RSVP, ticket creation, manual check-in, duplicate rejection, and undo.
-- Verifying route guards and role-specific navigation through the visible UI.
-- Checking stateful edge cases such as Draft direct URLs, waitlist promotion, Event Editor validation, gallery approval, and report moderation.
-- Producing concise Lovable bug-fix prompts when behavior failed acceptance criteria.
-
-OpenAI Atlas was then added alongside Claude as a second browser-based QA driver for the updated all-round test pass, with extra focus on the corrected authentication experience: visible email/password sign-in, Create Account, seeded-user credentials, redirect preservation, and removal of primary mock-account shortcuts.
-
-After the functional UI passes, Lovable's internal security scan was run against the generated implementation. That scan found two authorization issues that were not caught by the Claude or Atlas browser testing: cross-user ticket-page access and indefinitely reusable Host invite links. Both were addressed through targeted Lovable follow-up prompts and then treated as regression cases.
-
-This split responsibilities cleanly: Codex produced the requirements-aware prompts and test plans, Lovable implemented the app, Claude extension performed the first independent browser QA pass, and Atlas was used for the follow-up all-round UI validation.
-
-The main prompt-engineering decision was to avoid one huge implementation prompt. The final prompt pack starts with a stage-setting brief, then asks Lovable to build in phases:
+The prototype was intentionally built in phases:
 
 1. Public discovery, RSVP, tickets, and waitlist.
 2. Host registration, event editor, dashboard, and CSV export.
@@ -82,121 +51,151 @@ The main prompt-engineering decision was to avoid one huge implementation prompt
 4. Feedback, gallery approval, reporting, and moderation.
 5. Final requirement-by-requirement hardening.
 
-Each phase included explicit acceptance tests. This made later Lovable iterations more targeted and reduced the risk of visually complete but behaviorally shallow pages.
+This was useful because it turned a large task into smaller state machines that could be reviewed one at a time. It also exposed the shape of the product before backend complexity was introduced.
+
+The first independent browser testing used a Claude browser extension and later OpenAI Atlas. This testing found issues that Lovable's own summaries did not prove, including draft route access, missing Event Editor validation, discoverability gaps for Host registration/member management, and security issues around ticket privacy and reusable invites. Those issues were fixed before the backend migration became the next step.
+
+## Evolution From Browser State To Cloud State
+
+The project first reached a working state as a browser-state prototype. That version was useful for fast deterministic review and for proving the product flows, but it was not enough once the task moved toward shared multi-user behavior. Events, RSVPs, tickets, and role changes created in one browser session needed to be visible to other users and sessions.
+
+The conversion was therefore handled as an extension of the existing app rather than a rebuild. A Lovable remix was created, the current UI/routes/flows were preserved, and the state/auth layer was migrated to Lovable Cloud. This kept the working product surface intact while replacing the persistence model underneath it.
+
+The migration path was staged:
+
+- Inspect the existing state/auth layer and identify where pages consumed shared state.
+- Add Lovable Cloud schema, auth, RLS, storage, and seeded data.
+- Replace prototype auth and reads with Cloud-backed auth and reads.
+- Move RSVP, tickets, and waitlist behavior into transaction-safe backend RPCs.
+- Move Host writes, event editor writes, check-in, invites, feedback, gallery, and reports to Cloud.
+- Harden RLS/function grants and run Lovable security checks.
+- Use OpenAI Atlas browser tests after each meaningful phase.
+
+This phased approach mattered because the app contains several interacting state machines: RSVP capacity, FIFO waitlists, tickets, check-in, role membership, invites, gallery moderation, and reports. Testing one backend surface at a time made failures much easier to isolate.
+
+## AI Toolchain And Prompting
+
+Lovable was the primary implementation environment. Its LLM performed most of the code-generation work: first the product prototype, then the schema creation, RLS setup, RPC implementation, frontend rewiring, and UI-preserving backend migration.
+
+OpenAI Codex was used as the planning, prompting, and analysis layer. Codex produced the initial Lovable product prompts, the Cloud migration prompts, Claude/Atlas QA prompts, and repository documentation, then converted Lovable/Atlas outputs into smaller follow-up prompts when failures appeared. Codex was especially useful for turning broad product/backend goals into narrower implementation phases.
+
+The Claude browser extension was used as the first independent UI test driver for the prototype. OpenAI Atlas then became the main independent UI test driver for the stateful version. Tests were written to prefer visible navigation first, then direct route/security checks. This caught issues that Lovable summaries alone did not prove.
+
+The practical loop became:
+
+1. Codex drafts a focused Lovable prompt.
+2. Lovable implements the phase.
+3. Atlas tests the app through the browser.
+4. Codex analyzes the failure report and drafts a smaller corrective prompt.
+5. The cycle repeats only for confirmed blockers.
+
+This was also important for Lovable credit usage. Broad retry prompts were avoided once Atlas could identify concrete failing flows.
 
 ## Application Design Details
 
-### Data and State
+### Data And Auth
 
-The app maintains seeded users, Hosts, memberships, events, RSVPs, tickets, check-ins, feedback, gallery photos, and reports in local browser state. Reset demo data restores the seeded state used by the QA plan.
-
-Seeded accounts cover the main permission and state combinations:
+Cloud auth provides the seeded review accounts:
 
 - Maya Chen: attendee.
 - Jordan Lee: Host of Brightside Collective.
 - Alex Rivera: Checker for Brightside Collective.
-- Priya Shah: waitlisted attendee.
-- Omar Brooks: attendee on the full event.
-- Riley Morgan: waitlisted/edge-case attendee.
+- Priya Shah: attendee/waitlist checks.
+- Omar Hassan: attendee/RSVP checks.
+- Riley Morgan: attendee/invite and edge-case checks.
 
-Seeded events cover the required visibility and lifecycle states:
+Private profile data lives in `profiles`; public-safe display data lives in `public_profiles`. Host membership is stored in `host_members`, not on user profile rows, so Host/Checker permissions remain scoped to a Host organization.
 
-- Upcoming open event.
-- Upcoming full event with waitlist.
-- Past event.
-- Draft event.
-- Unlisted event.
+### RSVP, Tickets, And Waitlist
 
-### RSVP and Waitlist
+RSVPs are backend-backed. The `rsvp_to_event` RPC locks the event row, checks capacity, creates or updates the RSVP, and issues a ticket when the attendee is Going. If the event is full, the attendee is Waitlisted and receives no confirmed ticket.
 
-RSVP capacity is enforced client-side. If Going count is below capacity, the attendee receives a Going RSVP and ticket. If the event is full, the attendee enters the waitlist. Promotion is FIFO based on waitlist creation order.
+`cancel_rsvp`, `promote_waitlist`, and `update_event_capacity` keep promotion FIFO. Confirmed tickets are owner-only, and waitlisted/cancelled attendees cannot access confirmed ticket pages.
 
-Promotion paths tested:
+### Host, Checker, And Check-In
 
-- A Going attendee cancels.
-- A Host increases capacity on a full event.
+Hosts can create and manage events, publish/unpublish, duplicate, export CSV, create invites, approve/hide gallery photos, and moderate reports. Checkers can access check-in for events under their Host but do not receive Host management actions.
 
-### Ticketing and Check-In
+Check-in uses backend validation through `check_in_ticket`. It accepts valid Going ticket codes, blocks duplicate scans, rejects invalid/wrong-event/non-confirmed codes, records who checked the attendee in, and supports undo via `undo_check_in`.
 
-Confirmed attendees receive a unique ticket code and QR display. The challenge does not require camera scanning, so the implemented check-in flow uses manual ticket-code entry. The check-in page validates:
+### Community And Moderation
 
-- Valid Going ticket.
-- Duplicate ticket.
-- Invalid ticket code.
-- Waitlisted ticket.
-- Cancelled ticket.
+Past events expose feedback and gallery actions. Feedback requires a 1-5 rating and an authenticated attendee. Gallery uploads start Pending and must be approved before public display. Reports are stored in Cloud and appear in the relevant Host review queue.
 
-It also supports undoing the last successful scan and updates live counters.
+## Migration Gotchas
 
-### Roles and Permissions
+The migration surfaced several concrete issues.
 
-The app models Host and Checker roles per Host.
+Auth initialization initially treated "session still loading" as "signed out," so refreshes on protected routes redirected to sign-in. The fix was to introduce explicit auth readiness/loading behavior and delay route decisions until the Cloud session resolved.
 
-- Host can create and manage events, view dashboard data, export CSVs, approve gallery uploads, and review reports.
-- Checker can access check-in for events under the Host and does not receive Host management actions.
-- Signed-out users and attendees are redirected away from protected routes.
+Role-derived navigation could briefly remain stale after account switching. The fix was to clear user-scoped state on sign-out and refetch memberships immediately after sign-in.
 
-Draft direct URLs are guarded so only the owning Host can preview or manage draft content.
+The RSVP RPC contained a PostgreSQL `FOUND` bug. An aggregate count query overwrote the implicit `FOUND` value from the earlier RSVP lookup, so first-time RSVPs could go down an update path with no row to update. Atlas exposed this because under-capacity RSVP failed while some waitlist paths appeared to work.
 
-### Community and Moderation
+Ticket generation also failed because `_gen_ticket_code` used `gen_random_bytes`, which was not available in the deployed database context. Under-capacity RSVP hit ticket generation and failed; full-event waitlist RSVP skipped ticket issuance and therefore passed. The ticket code generator was changed to derive randomness from `gen_random_uuid`.
 
-Past events expose feedback and gallery actions. Feedback requires a 1-5 rating and accepts an optional comment. Gallery uploads enter Pending state, and only approved photos are public. Reports appear in a Host review queue where the Host can resolve reports or hide reported content.
+The Event Editor needed hardening after Atlas found date/time input state, capacity editing, and cover URL editing could prevent valid draft creation. Fixing those inputs made draft creation, publish/unpublish, and duplicate persistence reliable.
+
+Lovable's security scan found backend hardening work that browser happy-path tests did not prove. Feedback comments were no longer made publicly readable, invite token lookup stayed behind backend acceptance, mutation RPCs were restricted to authenticated callers, and internal helper functions had public execution revoked.
 
 ## What Worked
 
-Phased prompting worked well. It gave Lovable smaller state machines to implement and made each iteration reviewable against concrete acceptance tests.
+Using Codex as a planning and review partner worked well. Codex did much of the heavy lifting in turning the backend idea into phased Lovable prompts, narrowing failed test results into targeted fix prompts, and producing Atlas test scenarios. This reduced the amount of manual backend design and prompt-writing required.
 
-The seeded localStorage approach worked well for deterministic challenge review. Reset demo data made it possible to repeat destructive flows such as check-in, undo, waitlist promotion, and moderation without external setup.
+The browser-state prototype worked well as a first step. It made the full product surface visible and testable before backend complexity entered the picture. That made the later migration easier because the desired UI and behavior were already concrete.
 
-The independent Claude browser-extension QA pass was valuable. It tested through the deployed UI and caught issues that a code-level self-check could miss, including draft event access and missing event-editor validation feedback.
+Using Lovable for implementation worked well once the prompts became specific. Lovable's LLM handled most of the prototype implementation, schema creation, RLS setup, RPC implementation, frontend rewiring, and UI-preserving migration work. The author's role was mainly to steer scope, paste prompts, run the app, review outputs, and decide which failures mattered.
+
+Atlas was useful as the independent checker. Running the app through Atlas made it clear which Lovable claims were actually true in the browser. This was especially useful for auth refresh, role navigation, RSVP persistence, Event Editor validation, and final end-to-end checks.
 
 ## What Did Not Work
 
-The initial instinct to create a single large Lovable build prompt was rejected. The feature surface is too wide and stateful for one implementation pass.
+Broad prompts and broad test passes did not work well. When too much was tested or requested at once, one early failure blocked the rest of the validation. The work became more effective after narrowing each loop to one surface area: auth, RSVP, Event Editor, remaining writes, then security hardening.
 
-Some browser-preview constraints limited direct inspection of social metadata and `.ics` file contents from inside an iframe. Those areas were verified through a mix of browser behavior, Lovable code review, and targeted follow-up checks.
+Lovable's implementation summaries could not be treated as proof. Several flows were reported as implemented before browser testing showed they were broken or incomplete.
 
-A route-based QA blind spot emerged during later review. AI-driven browser tests could validate Host Dashboard and event-editor behavior by navigating directly to known routes, but that did not prove a real user could discover those flows from the visible UI. In one pass, the Host functionality existed behind routes, while a signed-in non-host user had no obvious navigation affordance to begin Host registration. This made a feature appear implemented under automated route-based QA while remaining effectively unavailable to an ordinary user. The test scenario was updated to require visible navigation discovery before direct-route checks for protected and role-based flows.
+The prototype stage also exposed a recurring route-discoverability problem. Some functionality existed by direct URL or internal state path, but a real user could not find it through visible navigation. This affected Host registration and Host member/invite management during earlier QA. The test scenarios were adjusted to require visible navigation before direct route checks.
 
-The same gotcha appeared a second time in Scenario 18: Host member/invite management. Lovable had implemented parts of the invite concept, but the Host Dashboard did not expose a visible path to member or invite management. From a product standpoint, that means the feature was still missing, because a Host could not discover or use it without route knowledge. This looks like a recurring weakness of AI app generation: the model can produce route-level or state-level functionality while forgetting the navigation affordance that makes it reachable in the actual product.
+The initial browser-state implementation also had security weaknesses that happy-path UI testing did not catch. In particular, ticket pages needed owner-only access, and Host invite links needed expiry/single-use behavior. Lovable's security scan and targeted follow-up prompts were useful for catching and fixing those gaps.
 
-The issue was caught because the QA harness was prompted to test discoverability before direct-route behavior. The relevant rule is documented in the [Atlas/Claude test scenario](testing-approach.md): "If a feature works by typing a known URL but has no visible UI entry point for the relevant user role, mark it as FAIL." This became one of the most useful QA practices in the project: test what a real user can find first, then test deep links and route guards second.
+Codex was helpful at planning and diagnosis, but it could not directly inspect or operate the Lovable editor. The author still had to act as the bridge: paste prompts into Lovable, run Atlas sessions, collect screenshots/results, and bring outputs back for analysis.
 
-The initial Lovable implementation also had two security issues that the Claude and Atlas UI passes did not identify. First, the authenticated `/tickets/:ticketCode` route could render another user's ticket details if the requester knew the ticket code. Second, Host invite links had no expiry and could be reused indefinitely. These were not failures of the product requirements; they were over-permissive implementation details outside the happy-path functional scenarios. Lovable's internal security scan flagged both issues after the browser QA passes.
-
-Both findings were fixed through targeted hardening prompts. Ticket pages were changed to owner-only access: signed-out users are redirected to sign-in, the owning attendee can view the ticket, and other signed-in users receive a neutral denied/not-found state without leaking whether the ticket exists. Host invite links were changed to be time-limited and single-use, with token metadata for creation, expiry, use time, and consuming user. Invite acceptance now re-checks the token after sign-in, blocks expired or already-used links, and avoids duplicate memberships.
+Lovable's LLM also made subtle backend mistakes. It implemented much of the backend successfully, but issues such as the PostgreSQL `FOUND` flag bug, unavailable `gen_random_bytes`, auth refresh timing, stale role navigation, and fragile Event Editor validation surfaced only through testing.
 
 Real camera scanning was not implemented. The task explicitly states that manual code entry is sufficient, so the implementation focuses on generated QR tickets and robust manual validation.
 
 ## Notable Decisions
 
-- Use localStorage instead of Supabase or another backend to keep review setup friction at zero.
-- Make Explore the first useful screen, rather than a landing page.
+- Promote the Lovable Cloud remix as the official Task 2 submission.
+- Keep the browser-state prototype in the development record as the first working version, but not as the final submission target.
+- Preserve the existing UI and routes while migrating persistence underneath.
+- Use Lovable Cloud only, with no custom backend server or external Supabase project.
+- Move race-sensitive operations to backend RPCs.
+- Remove public reset because shared backend reset would affect all users/sessions.
 - Keep Paid visible but disabled with a "Coming soon" tooltip.
-- Treat Draft event direct URLs as protected Host-only previews.
-- Use manual code entry for check-in, while still generating QR tickets.
-- Keep repository artifacts separate from the Lovable app generation prompts.
-- Use Claude browser-extension QA as an independent black-box pass after Lovable self-checks, then add Atlas for a follow-up all-round UI test after auth changes.
+- Use manual code entry for check-in while still generating QR tickets.
+- Use Atlas before spending additional Lovable credits, then send Lovable narrow fix prompts only for confirmed blockers.
 
 ## QA Summary
 
-Testing used three layers:
+Testing used four layers:
 
-- Lovable self-checks after implementation and hardening.
-- Independent browser QA with a Claude extension using the requirement-mapped scenario plan.
-- Follow-up all-round browser QA with OpenAI Atlas, focused especially on the updated email/password and Create Account flows.
-- Lovable internal security scan for authorization and token-lifecycle issues that browser happy-path testing could miss.
-- Targeted cross-testing for final risk areas: draft route guards, editor validation, FIFO promotion, invite links, page metadata, and `.ics` export.
+- Lovable self-checks after implementation phases.
+- OpenAI Atlas browser QA after meaningful migration phases.
+- Lovable internal security scan for RLS/function-grant issues.
+- Targeted regression checks after confirmed blockers.
 
-The final detailed results are documented in [final-test-report.md](final-test-report.md).
+The final Atlas pass found no blocking issues. It verified public browsing, unlisted and draft behavior, RSVP/ticket/waitlist flows, owner-only tickets, Host event writes, capacity promotion, check-in and undo, single-use invites, feedback, gallery moderation, report moderation, role boundaries, absence of public reset, and absence of browser-local persistence messaging.
+
+Detailed final results are documented in [final-test-report.md](final-test-report.md).
 
 ## Deployment
 
-Public URL: https://gather-event-joy.lovable.app
+Official public URL: https://gather-pass-hub.lovable.app/
 
 ## Remaining Limitations
 
-- Demo persistence is browser-local and resettable by design.
 - QR camera scanning is not included; manual ticket-code entry is the supported check-in method.
 - Paid events are intentionally disabled.
-- The seeded dataset includes one Host, though the role model supports adding more via demo flows.
+- The seeded dataset includes one Host, though the role model supports additional Hosts.
+- Atlas could trigger CSV download but could not inspect downloaded file contents in every environment; the repository includes [example-rsvp-export.csv](example-rsvp-export.csv) with the required schema.
