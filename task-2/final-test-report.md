@@ -49,6 +49,8 @@ Test method:
 | Event visibility | PASS | Unlisted direct URL worked; Draft direct URL was blocked for non-hosts |
 | Seeded Cloud reads | PASS | My Tickets, My Events, and Host Dashboard loaded seeded Cloud data |
 | Auth/session persistence | PASS | Refresh preserved authenticated sessions after the auth-loading fix |
+| Create Account | PASS | Unique new user account created, signed in immediately, persisted after refresh, could RSVP and view ticket |
+| Auth validation errors | PASS | Duplicate email, invalid email, and short password showed accurate errors |
 | Role navigation | PASS | Host/Checker/Attendee navigation resolved correctly after sign-in/sign-out |
 | RSVP redirect | PASS | Signed-out RSVP redirected to sign-in and returned to the event |
 | RSVP under capacity | PASS | Going RSVP and ticket were created and persisted |
@@ -97,6 +99,7 @@ Golden path result: PASS
 | First-time RSVP could fail because PostgreSQL `FOUND` was overwritten by an aggregate query | High | Replaced implicit `FOUND` dependency with explicit existing-row flag |
 | Ticket creation failed because `gen_random_bytes` was unavailable | High | Changed ticket code generation to use `gen_random_uuid`-based randomness |
 | Event Editor blocked valid draft creation due to fragile date/time/capacity/URL input state | High | Hardened local date construction, error clearing, capacity state, cover URL handling, and Host ID validation |
+| Create Account mapped multiple unique emails to "account already exists" and blocked new users | High | Fixed signup handling/error mapping; retest created `atlas-create-20260508-213000@example.com`, signed in immediately, persisted session, RSVP/ticket worked, and duplicate/invalid-input probes passed |
 | Feedback rows were publicly readable after initial RLS setup | High | Restricted feedback SELECT to author or event Host |
 | Internal helper functions were callable too broadly | Medium | Revoked public/authenticated execution where helpers should only run internally |
 | Invite token enumeration risk | Medium | Kept invite acceptance behind backend RPC and no public invite SELECT-by-token policy |

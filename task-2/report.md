@@ -136,6 +136,8 @@ Ticket generation also failed because `_gen_ticket_code` used `gen_random_bytes`
 
 The Event Editor needed hardening after Atlas found date/time input state, capacity editing, and cover URL editing could prevent valid draft creation. Fixing those inputs made draft creation, publish/unpublish, and duplicate persistence reliable.
 
+The Create Account flow produced a late auth issue that was not caught by the earlier LLM-backed testing. Most automated auth checks used seeded accounts, so the first-time user path was under-tested. A manual exploratory check found that several unique emails were incorrectly rejected with "account already exists." After a targeted Lovable fix, Atlas retested account creation with `atlas-create-20260508-213000@example.com`: the account was created without email verification, the session persisted after refresh, RSVP/ticket creation worked, duplicate email was rejected accurately, and invalid email/short password errors were correctly distinguished.
+
 Lovable's security scan found backend hardening work that browser happy-path tests did not prove. Feedback comments were no longer made publicly readable, invite token lookup stayed behind backend acceptance, mutation RPCs were restricted to authenticated callers, and internal helper functions had public execution revoked.
 
 ## What Worked
@@ -155,6 +157,8 @@ Broad prompts and broad test passes did not work well. When too much was tested 
 Lovable's implementation summaries could not be treated as proof. Several flows were reported as implemented before browser testing showed they were broken or incomplete.
 
 The prototype stage also exposed a recurring route-discoverability problem. Some functionality existed by direct URL or internal state path, but a real user could not find it through visible navigation. This affected Host registration and Host member/invite management during earlier QA. The test scenarios were adjusted to require visible navigation before direct route checks.
+
+The Create Account issue showed another blind spot: seeded-user testing can make auth look healthier than it is. LLM-backed browser testing repeatedly exercised known users, while manual checking of a genuinely new account uncovered the broken signup path. The final test plan now keeps a dedicated timestamped-email Create Account scenario with duplicate and invalid-input probes.
 
 The initial browser-state implementation also had security weaknesses that happy-path UI testing did not catch. In particular, ticket pages needed owner-only access, and Host invite links needed expiry/single-use behavior. Lovable's security scan and targeted follow-up prompts were useful for catching and fixing those gaps.
 
@@ -183,6 +187,7 @@ Testing used four layers:
 - Lovable self-checks after implementation phases.
 - OpenAI Atlas browser QA after meaningful migration phases.
 - Lovable internal security scan for RLS/function-grant issues.
+- Manual exploratory checks for gaps not covered by seeded-account LLM testing, including true first-time account creation.
 - Targeted regression checks after confirmed blockers.
 
 The final Atlas pass found no blocking issues. It verified public browsing, unlisted and draft behavior, RSVP/ticket/waitlist flows, owner-only tickets, Host event writes, capacity promotion, check-in and undo, single-use invites, feedback, gallery moderation, report moderation, role boundaries, absence of public reset, and absence of browser-local persistence messaging.

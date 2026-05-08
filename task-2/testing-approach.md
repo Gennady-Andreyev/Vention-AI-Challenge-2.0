@@ -45,15 +45,21 @@ Verify:
 5. Jordan can sign in with jordan@example.com / demo123.
 6. Maya can sign in with maya@example.com / demo123.
 7. Alex can sign in with alex@example.com / demo123.
-8. Redirect-after-sign-in works when starting from RSVP or a protected route.
-9. Maya's My Tickets page loads seeded ticket/waitlist data from Cloud.
-10. Jordan's Host Dashboard loads seeded Host/events/counts from Cloud.
-11. Alex's My Events page loads Checker-accessible events from Cloud.
-12. Public reset action is absent.
-13. Footer/UI does not say data persists only in the browser.
-14. Refreshing authenticated routes keeps the user signed in and reloads Cloud data.
-15. Header/profile identity and role navigation update after sign-out and account switching.
-16. No primary route is blank or a placeholder.
+8. Create Account works for a brand-new timestamped email.
+9. Newly created user is signed in immediately, or can sign in immediately with the same credentials.
+10. Newly created user remains signed in after refresh.
+11. Newly created user has no Host/Checker role by default.
+12. Duplicate create-account attempt with the same email shows an accurate duplicate-account error.
+13. Invalid email and too-short password show accurate validation errors, not a duplicate-account error.
+14. Redirect-after-sign-in works when starting from RSVP or a protected route.
+15. Maya's My Tickets page loads seeded ticket/waitlist data from Cloud.
+16. Jordan's Host Dashboard loads seeded Host/events/counts from Cloud.
+17. Alex's My Events page loads Checker-accessible events from Cloud.
+18. Public reset action is absent.
+19. Footer/UI does not say data persists only in the browser.
+20. Refreshing authenticated routes keeps the user signed in and reloads Cloud data.
+21. Header/profile identity and role navigation update after sign-out and account switching.
+22. No primary route is blank or a placeholder.
 
 Return:
 - PASS/FAIL by area.
@@ -61,6 +67,65 @@ Return:
 - Any route that failed.
 - Any visible issue with auth, loading states, route guards, or Cloud read data.
 - Do not mark write persistence as failed in this checkpoint.
+```
+
+## Create Account Regression Probe
+
+```text
+Retest the Create Account flow in GatherPass.
+
+Target app:
+https://gather-pass-hub.lovable.app/
+
+Use a fresh unique email:
+atlas-create-[current timestamp]@example.com
+Password: demo123
+Name: Atlas Create User
+
+Part A - Happy path:
+1. Open the app signed out.
+2. Go to Sign In.
+3. Choose Create Account.
+4. Enter the unique email, password, and name.
+5. Submit.
+6. Confirm account creation succeeds.
+7. Confirm the user is signed in immediately, or can immediately sign in with the same credentials.
+8. Refresh and confirm the session persists.
+9. Open Explore.
+10. Open an under-capacity upcoming public event.
+11. RSVP.
+12. Confirm Going status and ticket are created.
+13. Refresh and confirm RSVP/ticket persists.
+14. Sign out.
+15. Sign back in with the same new credentials.
+16. Confirm the same user identity and RSVP/ticket state are still present.
+17. Confirm the new user does not see Host Dashboard or My Events by default.
+18. Confirm no public reset action is visible.
+19. Confirm no primary route becomes blank.
+
+Part B - Duplicate email probe:
+1. Sign out.
+2. Return to Create Account.
+3. Try to create another account with the exact same email used in Part A.
+4. Confirm the app shows a clear duplicate-account error.
+5. Confirm it does not silently sign in, create a second profile, or show a misleading generic success state.
+
+Part C - Invalid input probe:
+1. Try an invalid email such as `not-an-email`.
+2. Confirm the app shows an accurate invalid-email error.
+3. Try a too-short password if the UI/backend has a minimum requirement.
+4. Confirm the error message is accurate and not "account already exists."
+
+Return:
+- PASS/FAIL by part and step.
+- Exact unique email used.
+- Whether account creation returned an active session or required immediate sign-in.
+- Whether refresh preserved session.
+- Whether RSVP/ticket persisted.
+- Exact duplicate-email error text.
+- Exact invalid-input error text.
+- Any console/auth/backend error visible.
+- Any blocking issue with route, expected result, and actual result.
 ```
 
 ## Checkpoint B: RSVP, Tickets, And Waitlist RPCs
