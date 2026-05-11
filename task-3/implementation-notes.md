@@ -34,6 +34,13 @@ These notes capture the current implementation journey for the final task report
 - A real MDN JavaScript article test produced a material-specific summary in Telegram.
 - The learning material row was saved in `learning_materials`.
 - The Telegram summary message includes a Start quiz inline button.
+- The `/quiz` route now responds with "Choose a saved topic:" and shows at least one saved-topic inline button.
+- Pressing the Start quiz inline button reaches the topic callback route, but that route still sends the placeholder "Topic callback coming soon!" message.
+- The topic callback branch now parses `topic:<materialId>` and loads the matching row from `learning_materials`.
+- The Examiner quiz generation step now produces valid five-question quiz JSON for the selected material.
+- The workflow now saves a quiz attempt and sends the first question to Telegram.
+- The Examiner prompt interpolation was corrected by preparing a `chatInput` field before the Basic LLM Chain; generated questions now reference the selected MDN JavaScript material instead of literal n8n expressions.
+- A/B/C/D inline answer buttons are now visible on the first quiz question.
 
 ## Tool roles and observations
 
@@ -50,6 +57,7 @@ These notes capture the current implementation journey for the final task report
   - table columns required horizontal scrolling to audit.
 - n8n AI Builder repeatedly failed during small edit prompts with:
   - `Cannot read properties of null (reading 'replace')`
+- The same n8n AI Builder error also blocked later attempts to generate the quiz-start branch, so further workflow construction moved to manual node-by-node editing.
 - The generated workflow originally used an output parser that failed with:
   - `"[object Object]" is not valid JSON`
 - The parser approach was replaced with normal Code nodes that parse raw AI JSON output.
@@ -62,8 +70,9 @@ These notes capture the current implementation journey for the final task report
 
 ## Current limitations
 
-- `/quiz` is still a placeholder.
-- `topic:<materialId>` callback handling is still a placeholder.
+- `/quiz` route is reachable and displays saved topic buttons.
+- `topic:<materialId>` callback handling parses the material id, loads the saved material, generates five relevant quiz questions, saves an attempt, and sends the first question.
+- Answer callbacks still need to store responses, advance through the remaining questions, and calculate final score.
 - `answer:<attemptId>:<questionIndex>:<optionKey>` callback handling is still a placeholder.
 - `quiz_attempts` exists but is not used yet.
 - Key points and concepts are currently displayed as raw JSON strings in the Telegram summary; this is functional but should be formatted more cleanly later.
