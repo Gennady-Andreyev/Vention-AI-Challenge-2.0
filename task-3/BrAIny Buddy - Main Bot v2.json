@@ -1,0 +1,748 @@
+{
+  "name": "BrAIny Buddy - Main Bot v2",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message",
+          "callback_query"
+        ],
+        "additionalFields": {}
+      },
+      "id": "e3ddd45d-0a5f-4268-a2ff-acabbf598f9e",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        784
+      ],
+      "webhookId": "cd761710-49b8-47b0-bb8b-5f152c701c7b",
+      "credentials": {
+        "telegramApi": {
+          "id": "ihPWnYRp34xU7q2q",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst normalized = [];\n\nfor (const item of items) {\n  const data = item.json;\n  \n  let eventType = 'unknown';\n  let chatId = null;\n  let userId = null;\n  let text = '';\n  let callbackData = '';\n  let callbackQueryId = '';\n  let firstName = '';\n  \n  if (data.message) {\n    eventType = 'message';\n    chatId = data.message.chat?.id || null;\n    userId = data.message.from?.id || null;\n    text = data.message.text || '';\n    firstName = data.message.from?.first_name || '';\n  } else if (data.callback_query) {\n    eventType = 'callback_query';\n    chatId = data.callback_query.message?.chat?.id || null;\n    userId = data.callback_query.from?.id || null;\n    callbackData = data.callback_query.data || '';\n    callbackQueryId = data.callback_query.id || '';\n    firstName = data.callback_query.from?.first_name || '';\n  }\n  \n  normalized.push({\n    json: {\n      eventType,\n      chatId,\n      userId,\n      text,\n      callbackData,\n      callbackQueryId,\n      firstName\n    }\n  });\n}\n\nreturn normalized;"
+      },
+      "id": "4323ed19-b12a-43d0-8dc5-c841ba601776",
+      "name": "Normalize Telegram Update",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.text }}",
+                    "rightValue": "/start",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "start"
+            },
+            {
+              "conditions": {
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.text }}",
+                    "rightValue": "/help",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "help"
+            },
+            {
+              "conditions": {
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.text }}",
+                    "rightValue": "/learn ",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  },
+                  {
+                    "leftValue": "={{ $json.text }}",
+                    "rightValue": "http",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "learnWithUrl"
+            },
+            {
+              "conditions": {
+                "combinator": "or",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.text }}",
+                    "rightValue": "/learn",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  },
+                  {
+                    "leftValue": "={{ $json.text }}",
+                    "rightValue": "/learn ",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "learnNoUrl"
+            },
+            {
+              "conditions": {
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.text }}",
+                    "rightValue": "/quiz",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "quiz"
+            },
+            {
+              "conditions": {
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.callbackData }}",
+                    "rightValue": "topic:",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "topicCallback"
+            },
+            {
+              "conditions": {
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.callbackData }}",
+                    "rightValue": "answer:",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "answerCallback"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "fallback"
+        }
+      },
+      "id": "ce3e59db-c883-48fa-98b1-7c20b748ee2d",
+      "name": "Command Router",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        688,
+        688
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "Welcome to BrAIny Buddy.\n\nSend /learn <url> to summarize a learning material.\nSend /quiz to practice saved topics.",
+        "additionalFields": {}
+      },
+      "id": "53f32241-57d9-450f-bb95-f9d7769ab413",
+      "name": "Send Welcome",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        912,
+        208
+      ],
+      "webhookId": "c11cc05c-7562-4f92-bbec-4bea0440b3ad",
+      "credentials": {
+        "telegramApi": {
+          "id": "ihPWnYRp34xU7q2q",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst text = item.text || '';\n\nconst urlRegex = /(https?:\\/\\/[^\\s]+)/;\nconst match = text.match(urlRegex);\nconst url = match ? match[1] : '';\n\nreturn [{\n  json: {\n    url,\n    chatId: item.chatId,\n    userId: item.userId,\n    firstName: item.firstName\n  }\n}];"
+      },
+      "id": "24532fcc-8dd8-43b2-a4f6-37a229100a04",
+      "name": "Extract URL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "redirect": {
+            "redirect": {
+              "maxRedirects": 5
+            }
+          },
+          "timeout": 30000
+        }
+      },
+      "id": "92392f60-8cd3-4e70-9343-1ff2f6010fda",
+      "name": "Fetch URL Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1136,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first();\n\nif (!input || !input.json) {\n  throw new Error('Clean HTML Content received no input item');\n}\n\nconst data = input.json;\n\nconst url =\n  data.url ||\n  $('Extract URL').first().json.url;\n\nlet html =\n  data.body ||\n  data.data ||\n  data.html ||\n  data.response ||\n  data.text ||\n  '';\n\nif (typeof html !== 'string') {\n  html = JSON.stringify(html);\n}\n\nlet title = '';\nconst titleMatch = html.match(/<title[^>]*>([\\s\\S]*?)<\\/title>/i);\nif (titleMatch) {\n  title = titleMatch[1];\n}\n\nlet content = html\n  .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ')\n  .replace(/<style[\\s\\S]*?<\\/style>/gi, ' ')\n  .replace(/<svg[\\s\\S]*?<\\/svg>/gi, ' ')\n  .replace(/<nav[\\s\\S]*?<\\/nav>/gi, ' ')\n  .replace(/<header[\\s\\S]*?<\\/header>/gi, ' ')\n  .replace(/<footer[\\s\\S]*?<\\/footer>/gi, ' ')\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/&nbsp;/g, ' ')\n  .replace(/&amp;/g, '&')\n  .replace(/&lt;/g, '<')\n  .replace(/&gt;/g, '>')\n  .replace(/&quot;/g, '\"')\n  .replace(/&#39;/g, \"'\")\n  .replace(/\\s+/g, ' ')\n  .trim();\n\ntitle = title\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nif (!content) {\n  throw new Error('No readable content could be extracted from the fetched URL');\n}\n\nreturn [\n  {\n    json: {\n      url,\n      chatId: $('Extract URL').first().json.chatId,\n      userId: $('Extract URL').first().json.userId,\n      firstName: $('Extract URL').first().json.firstName,\n      title: title || url,\n      content: content.slice(0, 12000),\n    },\n  },\n];\n"
+      },
+      "id": "de8793d2-fe1f-416b-bfdf-1e04a6f7e8e0",
+      "name": "Clean HTML Content",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        592
+      ],
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are the Teacher role in BrAIny Buddy, an AI learning assistant.\n\nAnalyze the provided learning material and return only raw valid JSON.\nDo not use Markdown.\nDo not wrap JSON in code fences.\nDo not include commentary before or after the JSON.\n\nInput:\nURL: {{ $json.url }}\nExtracted title: {{ $json.title }}\nContent:\n{{ $json.content }}\n\nReturn exactly this JSON shape:\n{\n  \"title\": \"string\",\n  \"summary\": \"string\",\n  \"keyPoints\": [\"point 1\", \"point 2\", \"point 3\", \"point 4\", \"point 5\"],\n  \"concepts\": [\"concept 1\", \"concept 2\"],\n  \"difficulty\": \"beginner\"\n}\n\nRules:\n- keyPoints must contain 5 to 7 specific strings.\n- concepts must be an array of strings.\n- difficulty must be one of: beginner, intermediate, advanced.\n- The summary must be specific to the submitted URL content.",
+        "options": {
+          "systemMessage": "You are a helpful teacher assistant that analyzes learning materials and returns structured JSON data."
+        }
+      },
+      "id": "f406924f-0266-404e-bd72-077c17d989ca",
+      "name": "Teacher Agent - Summarize Material",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1584,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "917ff624-9042-40bb-b44c-2855520142e9",
+      "name": "OpenAI Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1664,
+        816
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst aiItem = items[0].json;\n\nlet rawOutput = aiItem.output || aiItem.text || aiItem.response || aiItem.result || aiItem.content || '';\n\nif (typeof rawOutput === 'object') {\n  rawOutput = JSON.stringify(rawOutput);\n}\n\n// Strip markdown code fences\nrawOutput = rawOutput.replace(/^```json\\s*/i, '').replace(/```\\s*$/, '');\n\n// Find first JSON object\nconst jsonMatch = rawOutput.match(/\\{[\\s\\S]*\\}/);\nif (!jsonMatch) {\n  throw new Error('No JSON object found in AI output');\n}\n\nlet parsed;\ntry {\n  parsed = JSON.parse(jsonMatch[0]);\n} catch (e) {\n  throw new Error('Failed to parse JSON: ' + e.message);\n}\n\n// Validate and normalize\nconst title = parsed.title || 'Untitled';\nconst summary = parsed.summary || 'No summary available';\nconst keyPoints = Array.isArray(parsed.keyPoints) ? parsed.keyPoints : [];\nconst concepts = Array.isArray(parsed.concepts) ? parsed.concepts : [];\nlet difficulty = parsed.difficulty || 'intermediate';\n\nif (!['beginner', 'intermediate', 'advanced'].includes(difficulty)) {\n  difficulty = 'intermediate';\n}\n\nreturn [{\n  json: {\n    title,\n    summary,\n    keyPoints,\n    concepts,\n    difficulty\n  }\n}];"
+      },
+      "id": "887c3865-c67f-49bf-aef6-3e4d4abf55b9",
+      "name": "Parse Teacher JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1936,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first();\n\nif (!input || !input.json) {\n  throw new Error('Prepare Material Data received no input item');\n}\n\nconst teacher = input.json;\n\nconst cleaned = $('Clean HTML Content').first().json;\n\nconst now = new Date().toISOString();\nconst materialId = `LM-${Date.now()}`;\n\nconst keyPoints = Array.isArray(teacher.keyPoints) ? teacher.keyPoints : [];\nconst concepts = Array.isArray(teacher.concepts) ? teacher.concepts : [];\n\nreturn [\n  {\n    json: {\n      materialId,\n      userId: cleaned.userId,\n      chatId: cleaned.chatId,\n      url: cleaned.url,\n      title: teacher.title || cleaned.title || cleaned.url,\n      content: cleaned.content,\n      summary: teacher.summary,\n      keyPointsJson: JSON.stringify(keyPoints),\n      conceptsJson: JSON.stringify(concepts),\n      difficulty: teacher.difficulty || 'intermediate',\n      addedAt: now,\n    },\n  },\n];\n"
+      },
+      "id": "da57d12e-53db-4ffb-b15c-6b2cad213186",
+      "name": "Prepare Material Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "OucbL9ApEovEdnow",
+          "mode": "list",
+          "cachedResultName": "learning_materials",
+          "cachedResultUrl": "/projects/ctLX77vBblhMtYP5/datatables/OucbL9ApEovEdnow"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "materialId": "={{ $json.materialId }}",
+            "userId": "={{ $json.userId }}",
+            "chatId": "={{ $json.chatId }}",
+            "url": "={{ $json.url }}",
+            "title": "={{ $json.title }}",
+            "content": "={{ $json.content }}",
+            "summary": "={{ $json.summary }}",
+            "keyPointsJson": "={{ $json.keyPointsJson }}",
+            "conceptsJson": "={{ $json.conceptsJson }}",
+            "difficulty": "={{ $json.difficulty }}",
+            "addedAt": "={{ $json.addedAt }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "5e49055e-c0e5-42ef-93b3-8fbc8d483b59",
+      "name": "Save to learning_materials",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2384,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "Usage: /learn https://example.com/article",
+        "additionalFields": {}
+      },
+      "id": "11de7384-0fb7-447b-817b-4d63ef1e7cbb",
+      "name": "Send Learn Usage",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        912,
+        400
+      ],
+      "webhookId": "273afe8b-ce6a-4aea-bcf6-644ea2274eab",
+      "credentials": {
+        "telegramApi": {
+          "id": "ihPWnYRp34xU7q2q",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "Quiz feature coming soon!",
+        "additionalFields": {}
+      },
+      "id": "0f787eef-2878-450d-b262-72cbedd578f3",
+      "name": "Quiz Handler (TODO)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        912,
+        784
+      ],
+      "webhookId": "a56ca80b-56b1-45ad-bf33-6b158c44edf9",
+      "credentials": {
+        "telegramApi": {
+          "id": "ihPWnYRp34xU7q2q",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "Topic callback coming soon!",
+        "additionalFields": {}
+      },
+      "id": "1026a59a-1ea3-42f3-90fb-c2f16ed7c767",
+      "name": "Topic Callback (TODO)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        912,
+        976
+      ],
+      "webhookId": "4a44e653-c571-4083-ba3c-4560efff577a",
+      "credentials": {
+        "telegramApi": {
+          "id": "ihPWnYRp34xU7q2q",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "Answer callback coming soon!",
+        "additionalFields": {}
+      },
+      "id": "985cd6a7-19ca-4258-be66-a5424a2a9aae",
+      "name": "Answer Callback (TODO)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        912,
+        1168
+      ],
+      "webhookId": "5e2f0613-0240-4f81-9ed7-f67cc592bf38",
+      "credentials": {
+        "telegramApi": {
+          "id": "ihPWnYRp34xU7q2q",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "I didn't understand that command. Try /help for available commands.",
+        "additionalFields": {}
+      },
+      "id": "c9baa50e-ec8d-4f03-a683-09cfb72b6d0d",
+      "name": "Send Fallback",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        912,
+        1360
+      ],
+      "webhookId": "e995bdd7-c306-4881-9212-f2faf47f04f7",
+      "credentials": {
+        "telegramApi": {
+          "id": "ihPWnYRp34xU7q2q",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Prepare Material Data').first().json.chatId }}",
+        "text": "=Saved: {{ $('Prepare Material Data').first().json.title }}\n\nDifficulty: {{ $('Prepare Material Data').first().json.difficulty }}\n\nSummary:\n{{ $('Prepare Material Data').first().json.summary }}\n\nKey points:\n{{ $('Prepare Material Data').first().json.keyPointsJson }}\n\nMain concepts:\n{{ $('Prepare Material Data').first().json.conceptsJson }}",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Start quiz",
+                    "additionalFields": {
+                      "callback_data": "=topic:{{ $('Prepare Material Data').first().json.materialId }}"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2592,
+        592
+      ],
+      "id": "b849b955-d6ef-4979-80c4-71d708238c5a",
+      "name": "Send Summary with Quiz Button",
+      "webhookId": "65b2c869-708b-4f77-a1ac-efff69962013",
+      "credentials": {
+        "telegramApi": {
+          "id": "ihPWnYRp34xU7q2q",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Normalize Telegram Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Telegram Update": {
+      "main": [
+        [
+          {
+            "node": "Command Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Command Router": {
+      "main": [
+        [
+          {
+            "node": "Send Welcome",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Welcome",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract URL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Learn Usage",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Quiz Handler (TODO)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Topic Callback (TODO)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Answer Callback (TODO)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Fallback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract URL": {
+      "main": [
+        [
+          {
+            "node": "Fetch URL Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch URL Content": {
+      "main": [
+        [
+          {
+            "node": "Clean HTML Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean HTML Content": {
+      "main": [
+        [
+          {
+            "node": "Teacher Agent - Summarize Material",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Teacher Agent - Summarize Material": {
+      "main": [
+        [
+          {
+            "node": "Parse Teacher JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Teacher Agent - Summarize Material",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Teacher JSON": {
+      "main": [
+        [
+          {
+            "node": "Prepare Material Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Material Data": {
+      "main": [
+        [
+          {
+            "node": "Save to learning_materials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save to learning_materials": {
+      "main": [
+        [
+          {
+            "node": "Send Summary with Quiz Button",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "2f7a2bf8-1ce5-42be-a03e-5b9cfdb68df9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3e53940abcdba50b1f84058a3847b8de80ea98470135f44e0abbfc1001b585c4"
+  },
+  "id": "aHzul37HcbD3lHi3",
+  "tags": []
+}
