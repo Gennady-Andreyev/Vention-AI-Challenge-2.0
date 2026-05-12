@@ -908,7 +908,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1360,
+        1824,
         1296
       ],
       "id": "21d996b3-5708-4eee-a2a4-bef43ab52c5f",
@@ -1046,7 +1046,7 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        1584,
+        2048,
         1296
       ],
       "id": "07a2d07c-979e-4439-97c6-86e34f404db9",
@@ -1080,7 +1080,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1792,
+        2256,
         1296
       ],
       "id": "4f50ea40-2367-4380-b3b1-c0f4030e925b",
@@ -1130,7 +1130,7 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        2000,
+        2464,
         1408
       ],
       "id": "4f728612-39a8-48a2-bea7-3b0cf4018095",
@@ -1152,7 +1152,7 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        2000,
+        2464,
         1200
       ],
       "id": "298eb2f0-bee2-4742-91a4-7792dcdfc425",
@@ -1742,6 +1742,75 @@
           "name": "Telegram account"
         }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": "const answer = $('Parse Answer Callback').first().json;\nconst attempt = $input.first().json;\n\nlet questions = [];\nlet answers = [];\n\ntry {\n  questions = JSON.parse(attempt.questionsJson || '[]');\n  answers = JSON.parse(attempt.answersJson || '[]');\n} catch (error) {\n  return [\n    {\n      json: {\n        isValidAnswerState: false,\n        chatId: answer.chatId,\n        message: 'I could not read this quiz attempt. Please start a new quiz with /quiz.',\n      },\n    },\n  ];\n}\n\nconst currentIndex = Number(attempt.currentIndex || 0);\nconst alreadyAnswered = answers.some(item => item.questionIndex === answer.questionIndex);\nconst isCompleted = attempt.status === 'completed' || currentIndex >= questions.length;\n\nlet isValidAnswerState = true;\nlet message = '';\n\nif (isCompleted) {\n  isValidAnswerState = false;\n  message = 'This quiz is already complete. Start a new quiz with /quiz.';\n} else if (alreadyAnswered) {\n  isValidAnswerState = false;\n  message = 'This question was already answered. Please continue with the latest quiz question.';\n} else if (answer.questionIndex !== currentIndex) {\n  isValidAnswerState = false;\n  message = 'That answer belongs to an older quiz step. Please use the latest question.';\n}\n\nreturn [\n  {\n    json: {\n      ...attempt,\n      ...answer,\n      isValidAnswerState,\n      invalidAnswerMessage: message,\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1376,
+        1296
+      ],
+      "id": "a8b20134-1d7b-4312-acd1-722bc5cedc68",
+      "name": "Validate Answer State"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f924ba11-161a-48bd-a0d5-238a710c3b75",
+              "leftValue": "={{ $json.isValidAnswerState }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1584,
+        1296
+      ],
+      "id": "e73916ff-8345-4554-923a-95dc90431165",
+      "name": "Is Answer State Valid?"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.invalidAnswerMessage }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1792,
+        1504
+      ],
+      "id": "f81fe1f6-3098-448c-a1bc-0dcd74c49228",
+      "name": "Send Answer Ignored",
+      "webhookId": "63f54b27-ec29-4b51-83b6-6a2c149de304",
+      "credentials": {
+        "telegramApi": {
+          "id": "ihPWnYRp34xU7q2q",
+          "name": "Telegram account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -2055,7 +2124,7 @@
       "main": [
         [
           {
-            "node": "Process Answer",
+            "node": "Validate Answer State",
             "type": "main",
             "index": 0
           }
@@ -2294,6 +2363,35 @@
           }
         ]
       ]
+    },
+    "Validate Answer State": {
+      "main": [
+        [
+          {
+            "node": "Is Answer State Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Answer State Valid?": {
+      "main": [
+        [
+          {
+            "node": "Process Answer",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Answer Ignored",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
@@ -2301,7 +2399,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "92251335-8859-4fe9-9675-557d8f283b35",
+  "versionId": "6744ba9c-3c89-47a0-959e-52f519b3e709",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "3e53940abcdba50b1f84058a3847b8de80ea98470135f44e0abbfc1001b585c4"
