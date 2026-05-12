@@ -363,7 +363,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const input = $input.first();\n\nif (!input || !input.json) {\n  throw new Error('Prepare Material Data received no input item');\n}\n\nconst teacher = input.json;\n\nconst cleaned = $('Clean HTML Content').first().json;\n\nconst now = new Date().toISOString();\nconst materialId = `LM-${Date.now()}`;\n\nconst keyPoints = Array.isArray(teacher.keyPoints) ? teacher.keyPoints : [];\nconst concepts = Array.isArray(teacher.concepts) ? teacher.concepts : [];\n\nreturn [\n  {\n    json: {\n      materialId,\n      userId: cleaned.userId,\n      chatId: cleaned.chatId,\n      url: cleaned.url,\n      title: teacher.title || cleaned.title || cleaned.url,\n      content: cleaned.content,\n      summary: teacher.summary,\n      keyPointsJson: JSON.stringify(keyPoints),\n      conceptsJson: JSON.stringify(concepts),\n      difficulty: teacher.difficulty || 'intermediate',\n      addedAt: now,\n    },\n  },\n];\n"
+        "jsCode": "const input = $input.first();\n\nif (!input || !input.json) {\n  throw new Error('Prepare Material Data received no input item');\n}\n\nconst teacher = input.json;\nconst cleaned = $('Clean HTML Content').first().json;\n\nconst now = new Date().toISOString();\nconst materialId = `LM-${Date.now()}`;\n\nconst keyPoints = Array.isArray(teacher.keyPoints) ? teacher.keyPoints : [];\nconst concepts = Array.isArray(teacher.concepts) ? teacher.concepts : [];\n\nconst keyPointsText = keyPoints.length\n  ? keyPoints.map(point => `• ${point}`).join('\\n')\n  : 'No key points generated.';\n\nconst conceptsText = concepts.length\n  ? concepts.map(concept => `• ${concept}`).join('\\n')\n  : 'No concepts generated.';\n\nreturn [\n  {\n    json: {\n      materialId,\n      userId: cleaned.userId,\n      chatId: cleaned.chatId,\n      url: cleaned.url,\n      title: teacher.title || cleaned.title || cleaned.url,\n      content: cleaned.content,\n      summary: teacher.summary,\n      keyPointsJson: JSON.stringify(keyPoints),\n      conceptsJson: JSON.stringify(concepts),\n      keyPointsText,\n      conceptsText,\n      difficulty: teacher.difficulty || 'intermediate',\n      addedAt: now,\n    },\n  },\n];\n"
       },
       "id": "da57d12e-53db-4ffb-b15c-6b2cad213186",
       "name": "Prepare Material Data",
@@ -435,28 +435,6 @@
     {
       "parameters": {
         "chatId": "={{ $json.chatId }}",
-        "text": "Answer callback coming soon!",
-        "additionalFields": {}
-      },
-      "id": "985cd6a7-19ca-4258-be66-a5424a2a9aae",
-      "name": "Answer Callback (TODO)",
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [
-        912,
-        1168
-      ],
-      "webhookId": "5e2f0613-0240-4f81-9ed7-f67cc592bf38",
-      "credentials": {
-        "telegramApi": {
-          "id": "ihPWnYRp34xU7q2q",
-          "name": "Telegram account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "chatId": "={{ $json.chatId }}",
         "text": "I didn't understand that command. Try /help for available commands.",
         "additionalFields": {}
       },
@@ -466,7 +444,7 @@
       "typeVersion": 1.2,
       "position": [
         912,
-        1360
+        1488
       ],
       "webhookId": "e995bdd7-c306-4881-9212-f2faf47f04f7",
       "credentials": {
@@ -479,7 +457,7 @@
     {
       "parameters": {
         "chatId": "={{ $('Prepare Material Data').first().json.chatId }}",
-        "text": "=Saved: {{ $('Prepare Material Data').first().json.title }}\n\nDifficulty: {{ $('Prepare Material Data').first().json.difficulty }}\n\nSummary:\n{{ $('Prepare Material Data').first().json.summary }}\n\nKey points:\n{{ $('Prepare Material Data').first().json.keyPointsJson }}\n\nMain concepts:\n{{ $('Prepare Material Data').first().json.conceptsJson }}",
+        "text": "=Learning material saved: {{ $('Prepare Material Data').first().json.title }}\n\nDifficulty: {{ $('Prepare Material Data').first().json.difficulty }}\n\nSummary:\n{{ $('Prepare Material Data').first().json.summary }}\n\nKey points:\n{{ $('Prepare Material Data').first().json.keyPointsText }}\n\nMain concepts:\n{{ $('Prepare Material Data').first().json.conceptsText }}\n",
         "replyMarkup": "inlineKeyboard",
         "inlineKeyboard": {
           "rows": [
@@ -583,7 +561,7 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1568,
+        1392,
         832
       ],
       "id": "b4aac2a6-4ed6-483c-a8dc-6662cf6b3375",
@@ -916,6 +894,316 @@
           "name": "Telegram account"
         }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": "const update = $('Normalize Telegram Update').first().json;\n\nconst callbackData = update.callbackData || '';\n\nif (!callbackData.startsWith('answer:')) {\n  throw new Error(`Expected answer callback data, got: ${callbackData}`);\n}\n\nconst parts = callbackData.split(':');\n\nif (parts.length !== 4) {\n  throw new Error(`Invalid answer callback format: ${callbackData}`);\n}\n\nconst [, attemptId, questionIndexRaw, selectedOption] = parts;\nconst questionIndex = Number(questionIndexRaw);\n\nif (!Number.isInteger(questionIndex)) {\n  throw new Error(`Invalid question index: ${questionIndexRaw}`);\n}\n\nif (!['A', 'B', 'C', 'D'].includes(selectedOption)) {\n  throw new Error(`Invalid selected option: ${selectedOption}`);\n}\n\nreturn [\n  {\n    json: {\n      attemptId,\n      questionIndex,\n      selectedOption,\n      userId: update.userId,\n      chatId: update.chatId,\n      callbackQueryId: update.callbackQueryId,\n      answeredAt: new Date().toISOString(),\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        1296
+      ],
+      "id": "85b9e5dd-ab1b-4e88-97a5-b90dc0f6d41a",
+      "name": "Parse Answer Callback"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "kqjIwLkPw8rc2gO9",
+          "mode": "list",
+          "cachedResultName": "quiz_attempts",
+          "cachedResultUrl": "/projects/ctLX77vBblhMtYP5/datatables/kqjIwLkPw8rc2gO9"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "attemptId",
+              "keyValue": "={{ $json.attemptId }}"
+            },
+            {
+              "keyName": "userId",
+              "keyValue": "={{ $json.userId }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1168,
+        1296
+      ],
+      "id": "22f335c9-cf3d-4d61-a186-5c87c2ff343b",
+      "name": "Load Quiz Attempt"
+    },
+    {
+      "parameters": {
+        "jsCode": "const answer = $('Parse Answer Callback').first().json;\nconst attempt = $input.first().json;\n\nconst questions = JSON.parse(attempt.questionsJson || '[]');\nlet answers = JSON.parse(attempt.answersJson || '[]');\n\nif (!questions.length) {\n  throw new Error('Quiz attempt has no questions');\n}\n\nconst question = questions[answer.questionIndex];\n\nif (!question) {\n  throw new Error(`Question index not found: ${answer.questionIndex}`);\n}\n\nanswers = answers.filter(existing => existing.questionIndex !== answer.questionIndex);\nanswers.push({\n  questionIndex: answer.questionIndex,\n  selectedOption: answer.selectedOption,\n  answeredAt: answer.answeredAt,\n});\nanswers.sort((a, b) => a.questionIndex - b.questionIndex);\n\nconst isComplete = answers.length >= questions.length;\nconst nextIndex = answer.questionIndex + 1;\n\nif (isComplete) {\n  const correctCount = answers.reduce((count, item) => {\n    const q = questions[item.questionIndex];\n    return count + (q && item.selectedOption === q.correctAnswer ? 1 : 0);\n  }, 0);\n\n  const score = Math.round((correctCount / questions.length) * 100);\n\n  const feedback = questions.map((q, index) => {\n    const item = answers.find(a => a.questionIndex === index);\n    const selected = item ? item.selectedOption : 'No answer';\n    const isCorrect = selected === q.correctAnswer;\n\n    let line = `${index + 1}. ${isCorrect ? 'Correct' : 'Incorrect'} — selected ${selected}, correct ${q.correctAnswer}`;\n\n    if (!isCorrect && q.explanation) {\n      line += `\\nExplanation: ${q.explanation}`;\n    }\n\n    return line;\n  }).join('\\n\\n');\n\n  return [\n    {\n      json: {\n        attemptId: answer.attemptId,\n        userId: answer.userId,\n        chatId: answer.chatId,\n        answersJson: JSON.stringify(answers),\n        currentIndex: questions.length,\n        status: 'completed',\n        score,\n        isComplete: true,\n        text: `Quiz complete!\\n\\nScore: ${score}% (${correctCount}/${questions.length})\\n\\n${feedback}`,\n      },\n    },\n  ];\n}\n\nconst nextQuestion = questions[nextIndex];\nconst optionLines = nextQuestion.options\n  .map(option => `${option.key}. ${option.text}`)\n  .join('\\n');\n\nconst callbacks = Object.fromEntries(\n  nextQuestion.options.map(option => [\n    option.key,\n    `answer:${answer.attemptId}:${nextIndex}:${option.key}`,\n  ])\n);\n\nreturn [\n  {\n    json: {\n      attemptId: answer.attemptId,\n      userId: answer.userId,\n      chatId: answer.chatId,\n      answersJson: JSON.stringify(answers),\n      currentIndex: nextIndex,\n      status: 'in_progress',\n      score: 0,\n      isComplete: false,\n      text: `Question ${nextIndex + 1} of ${questions.length}:\\n${nextQuestion.question}\\n\\n${optionLines}`,\n\n      buttonAText: 'A',\n      buttonACallback: callbacks.A,\n      buttonBText: 'B',\n      buttonBCallback: callbacks.B,\n      buttonCText: 'C',\n      buttonCCallback: callbacks.C,\n      buttonDText: 'D',\n      buttonDCallback: callbacks.D,\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        1296
+      ],
+      "id": "21d996b3-5708-4eee-a2a4-bef43ab52c5f",
+      "name": "Process Answer"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "kqjIwLkPw8rc2gO9",
+          "mode": "list",
+          "cachedResultName": "quiz_attempts",
+          "cachedResultUrl": "/projects/ctLX77vBblhMtYP5/datatables/kqjIwLkPw8rc2gO9"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "attemptId",
+              "keyValue": "={{ $json.attemptId }}"
+            },
+            {
+              "keyName": "userId",
+              "keyValue": "={{ $json.userId }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "answersJson": "={{ $json.answersJson }}",
+            "currentIndex": "={{ $json.currentIndex }}",
+            "status": "={{ $json.status }}",
+            "score": "={{ $json.score }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "attemptId",
+              "displayName": "attemptId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "materialId",
+              "displayName": "materialId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "userId",
+              "displayName": "userId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "chatId",
+              "displayName": "chatId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "questionsJson",
+              "displayName": "questionsJson",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "answersJson",
+              "displayName": "answersJson",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "currentIndex",
+              "displayName": "currentIndex",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1584,
+        1296
+      ],
+      "id": "07a2d07c-979e-4439-97c6-86e34f404db9",
+      "name": "Update Quiz Attempt"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "68ee87a6-3811-47d8-b850-86fc4312b57e",
+              "leftValue": "={{ $('Process Answer').first().json.isComplete }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1792,
+        1296
+      ],
+      "id": "4f50ea40-2367-4380-b3b1-c0f4030e925b",
+      "name": "Is Quiz Complete?"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Process Answer').first().json.chatId }}",
+        "text": "={{ $('Process Answer').first().json.text }}",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "=A",
+                    "additionalFields": {
+                      "callback_data": "={{ $('Process Answer').first().json.buttonACallback }}"
+                    }
+                  },
+                  {
+                    "text": "B",
+                    "additionalFields": {
+                      "callback_data": "={{ $('Process Answer').first().json.buttonBCallback }}"
+                    }
+                  },
+                  {
+                    "text": "C",
+                    "additionalFields": {
+                      "callback_data": "={{ $('Process Answer').first().json.buttonCCallback }}"
+                    }
+                  },
+                  {
+                    "text": "D",
+                    "additionalFields": {
+                      "callback_data": "={{ $('Process Answer').first().json.buttonDCallback }}"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2000,
+        1408
+      ],
+      "id": "4f728612-39a8-48a2-bea7-3b0cf4018095",
+      "name": "Send Next Quiz Question",
+      "webhookId": "6bde7740-d759-4f8e-bb42-2de52b85123b",
+      "credentials": {
+        "telegramApi": {
+          "id": "ihPWnYRp34xU7q2q",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Process Answer').first().json.chatId }}",
+        "text": "={{ $('Process Answer').first().json.text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2000,
+        1200
+      ],
+      "id": "298eb2f0-bee2-4742-91a4-7792dcdfc425",
+      "name": "Send Quiz Results",
+      "webhookId": "e0d6e850-5824-4766-baa4-fe66de98f333",
+      "credentials": {
+        "telegramApi": {
+          "id": "ihPWnYRp34xU7q2q",
+          "name": "Telegram account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -988,7 +1276,7 @@
         ],
         [
           {
-            "node": "Answer Callback (TODO)",
+            "node": "Parse Answer Callback",
             "type": "main",
             "index": 0
           }
@@ -1210,6 +1498,68 @@
           }
         ]
       ]
+    },
+    "Parse Answer Callback": {
+      "main": [
+        [
+          {
+            "node": "Load Quiz Attempt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Quiz Attempt": {
+      "main": [
+        [
+          {
+            "node": "Process Answer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Answer": {
+      "main": [
+        [
+          {
+            "node": "Update Quiz Attempt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Quiz Attempt": {
+      "main": [
+        [
+          {
+            "node": "Is Quiz Complete?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Quiz Complete?": {
+      "main": [
+        [
+          {
+            "node": "Send Quiz Results",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Next Quiz Question",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -1217,7 +1567,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "744116c5-eff4-4fbe-97ad-c2738085f883",
+  "versionId": "1212a4db-90e7-477b-8008-b2736c67a422",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "3e53940abcdba50b1f84058a3847b8de80ea98470135f44e0abbfc1001b585c4"
