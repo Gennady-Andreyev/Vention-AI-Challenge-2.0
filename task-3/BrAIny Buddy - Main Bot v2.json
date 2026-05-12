@@ -292,7 +292,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const item = $input.first().json;\nconst text = item.text || '';\n\nconst urlRegex = /(https?:\\/\\/[^\\s]+)/;\nconst match = text.match(urlRegex);\nconst url = match ? match[1] : '';\n\nreturn [{\n  json: {\n    url,\n    chatId: item.chatId,\n    userId: item.userId,\n    firstName: item.firstName\n  }\n}];"
+        "jsCode": "const item = $input.first().json;\nconst text = String(item.text || '').trim();\n\nconst trackingParams = new Set([\n  'utm_source',\n  'utm_medium',\n  'utm_campaign',\n  'utm_term',\n  'utm_content',\n  'utm_id',\n  'gclid',\n  'fbclid',\n  'msclkid',\n  'igshid',\n]);\n\nconst blockedHosts = new Set([\n  'localhost',\n  '127.0.0.1',\n  '0.0.0.0',\n]);\n\nconst blockedDomains = new Set([\n  't.me',\n  'telegram.me',\n  'web.telegram.org',\n]);\n\nconst blockedHostSuffixes = [\n  '.local',\n  '.internal',\n];\n\nconst blockedExtensions = [\n  '.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg',\n  '.mp4', '.mov', '.avi', '.mp3', '.wav',\n  '.zip', '.tar', '.gz', '.rar', '.7z',\n  '.exe', '.dmg', '.pkg',\n];\n\nconst match = text.match(/https?:\\/\\/\\S+/i);\n\nlet url = '';\nlet normalizedUrl = '';\nlet isValidUrl = false;\nlet urlError = '';\nlet urlErrorDebug = '';\n\nfunction normalizeQuery(query) {\n  if (!query) {\n    return '';\n  }\n\n  const pairs = query\n    .replace(/^\\?/, '')\n    .split('&')\n    .filter(Boolean)\n    .filter(pair => {\n      const key = decodeURIComponent(pair.split('=')[0] || '').toLowerCase();\n      return !trackingParams.has(key);\n    });\n\n  return pairs.length ? `?${pairs.join('&')}` : '';\n}\n\nif (!match) {\n  urlError = 'Please send a URL after /learn.';\n} else {\n  url = match[0].trim().replace(/[),.;!?]+$/g, '');\n\n  try {\n    const parsed = url.match(/^(https?):\\/\\/([^/?#]+)([^?#]*)(\\?[^#]*)?(#.*)?$/i);\n\n    if (!parsed) {\n      throw new Error('URL did not match http(s) format');\n    }\n\n    const protocol = parsed[1].toLowerCase();\n    const hostWithPort = parsed[2].toLowerCase();\n    const host = hostWithPort.split(':')[0];\n    let path = parsed[3] || '/';\n    const query = normalizeQuery(parsed[4] || '');\n\n    if (!path.startsWith('/')) {\n      path = `/${path}`;\n    }\n\n    if (protocol !== 'http' && protocol !== 'https') {\n      urlError = 'Only http and https URLs are supported.';\n    } else if (blockedHosts.has(host)) {\n      urlError = 'Local URLs are not supported.';\n    } else if (/^(10|127|169\\.254|192\\.168)\\./.test(host)) {\n      urlError = 'Private network URLs are not supported.';\n    } else if (/^172\\.(1[6-9]|2\\d|3[0-1])\\./.test(host)) {\n      urlError = 'Private network URLs are not supported.';\n    } else if (blockedHostSuffixes.some(suffix => host.endsWith(suffix))) {\n      urlError = 'Internal/private URLs are not supported.';\n    } else if (blockedDomains.has(host)) {\n      urlError = 'Telegram links are not useful as learning materials. Please send an article, docs page, or tutorial.';\n    } else if (blockedExtensions.some(ext => path.toLowerCase().endsWith(ext))) {\n      urlError = 'That looks like a file or media URL. Please send an article, docs page, or tutorial.';\n    } else {\n      normalizedUrl = `${protocol}://${hostWithPort}${path}${query}`;\n\n      if (normalizedUrl.endsWith('/') && path !== '/') {\n        normalizedUrl = normalizedUrl.slice(0, -1);\n      }\n\n      isValidUrl = true;\n    }\n  } catch (error) {\n    urlError = 'That URL does not look valid. Please check it and try again.';\n    urlErrorDebug = error.message;\n  }\n}\n\nreturn [\n  {\n    json: {\n      ...item,\n      url: normalizedUrl || url,\n      originalUrl: url,\n      isValidUrl,\n      urlError,\n      urlErrorDebug,\n    },\n  },\n];\n"
       },
       "id": "24532fcc-8dd8-43b2-a4f6-37a229100a04",
       "name": "Extract URL",
@@ -305,7 +305,7 @@
     },
     {
       "parameters": {
-        "url": "={{ $json.url }}",
+        "url": "={{ $('Extract URL').first().json.url }}",
         "options": {
           "redirect": {
             "redirect": {
@@ -320,8 +320,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        1136,
-        592
+        1632,
+        576
       ]
     },
     {
@@ -333,8 +333,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1360,
-        592
+        1856,
+        576
       ],
       "executeOnce": false
     },
@@ -351,8 +351,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        1584,
-        592
+        2080,
+        576
       ]
     },
     {
@@ -390,8 +390,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1936,
-        592
+        2432,
+        576
       ]
     },
     {
@@ -403,8 +403,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2160,
-        592
+        2656,
+        576
       ]
     },
     {
@@ -477,8 +477,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        2800,
-        416
+        3296,
+        400
       ],
       "id": "b849b955-d6ef-4979-80c4-71d708238c5a",
       "name": "Send Summary with Quiz Button",
@@ -1357,8 +1357,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        2800,
-        592
+        3296,
+        576
       ]
     },
     {
@@ -1389,8 +1389,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        2368,
-        592
+        2864,
+        576
       ],
       "id": "e3ac1862-3a1b-4914-a159-71e888f69553",
       "name": "Find Existing Material",
@@ -1403,11 +1403,89 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2576,
-        592
+        3072,
+        576
       ],
       "id": "78468e9e-6f86-4b85-9f27-c938a5838fd8",
       "name": "Choose Material ID"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "28c5f3fb-c253-458e-847b-95a80107e0b5",
+              "leftValue": "={{ $json.isValidUrl }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1120,
+        592
+      ],
+      "id": "c5269b4e-c60b-4768-9e57-7d926dafa358",
+      "name": "Is URL Valid?"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.urlError }}  Use: /learn https://example.com/article",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1376,
+        672
+      ],
+      "id": "c7ef93ac-543f-4eca-91bb-f5628e386c9f",
+      "name": "Send Learn URL Error",
+      "webhookId": "b21ddd5a-3b0c-4a60-9393-4d1d7aac963d",
+      "credentials": {
+        "telegramApi": {
+          "id": "ihPWnYRp34xU7q2q",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "Got it. I’m reading the material and preparing a summary now.",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1376,
+        496
+      ],
+      "id": "13e18f2a-32ef-4ddf-8dce-8c6d03fba1c5",
+      "name": "Send Processing Message",
+      "webhookId": "0b673b06-fa6d-4507-bebf-28fa785ed624",
+      "credentials": {
+        "telegramApi": {
+          "id": "ihPWnYRp34xU7q2q",
+          "name": "Telegram account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -1505,7 +1583,7 @@
       "main": [
         [
           {
-            "node": "Fetch URL Content",
+            "node": "Is URL Valid?",
             "type": "main",
             "index": 0
           }
@@ -1803,14 +1881,43 @@
           }
         ]
       ]
+    },
+    "Is URL Valid?": {
+      "main": [
+        [
+          {
+            "node": "Send Processing Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Learn URL Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Processing Message": {
+      "main": [
+        [
+          {
+            "node": "Fetch URL Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": true,
+  "active": false,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "0780b1f7-84de-4d47-8590-c2c970c0a02f",
+  "versionId": "c315c3b6-8bd5-416b-a59e-38aa0fe5b535",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "3e53940abcdba50b1f84058a3847b8de80ea98470135f44e0abbfc1001b585c4"
