@@ -787,7 +787,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const material = $input.first().json;\nconst callback = $('Extract Material ID').first().json;\n\nconst prompt = `You are the Examiner role in BrAIny Buddy, an AI learning assistant.\n\nCreate a five-question multiple-choice quiz from the provided learning material.\nReturn only raw valid JSON.\nDo not use Markdown.\nDo not wrap JSON in code fences.\nDo not include commentary before or after the JSON.\n\nLearning material:\nTitle: ${material.title}\nSummary: ${material.summary}\nKey points JSON: ${material.keyPointsJson}\nConcepts JSON: ${material.conceptsJson}\nContent:\n${String(material.content || '').slice(0, 12000)}\n\nReturn exactly this JSON shape:\n{\n  \"questions\": [\n    {\n      \"id\": \"Q1\",\n      \"question\": \"string\",\n      \"options\": [\n        {\"key\": \"A\", \"text\": \"string\"},\n        {\"key\": \"B\", \"text\": \"string\"},\n        {\"key\": \"C\", \"text\": \"string\"},\n        {\"key\": \"D\", \"text\": \"string\"}\n      ],\n      \"correctAnswer\": \"A\",\n      \"explanation\": \"string\"\n    }\n  ]\n}\n\nRules:\n- Generate exactly five questions.\n- Questions must be specific to this material.\n- Each question must have exactly four options: A, B, C, D.\n- correctAnswer must be A, B, C, or D.\n- explanation must help the learner understand the answer.`;\n\nreturn [\n  {\n    json: {\n      ...material,\n      materialId: callback.materialId,\n      userId: callback.userId,\n      chatId: callback.chatId,\n      callbackQueryId: callback.callbackQueryId,\n      chatInput: prompt,\n    },\n  },\n];\n"
+        "jsCode": "const material = $('Load Material').first().json;\nconst callback = $('Extract Material ID').first().json;\n\nconst prompt = `You are the Examiner role in BrAIny Buddy, an AI learning assistant.\n\nCreate a five-question multiple-choice quiz from the provided learning material.\nReturn only raw valid JSON.\nDo not use Markdown.\nDo not wrap JSON in code fences.\nDo not include commentary before or after the JSON.\n\nLearning material:\nTitle: ${material.title}\nSummary: ${material.summary}\nKey points JSON: ${material.keyPointsJson}\nConcepts JSON: ${material.conceptsJson}\nContent:\n${String(material.content || '').slice(0, 12000)}\n\nReturn exactly this JSON shape:\n{\n  \"questions\": [\n    {\n      \"id\": \"Q1\",\n      \"question\": \"string\",\n      \"options\": [\n        {\"key\": \"A\", \"text\": \"string\"},\n        {\"key\": \"B\", \"text\": \"string\"},\n        {\"key\": \"C\", \"text\": \"string\"},\n        {\"key\": \"D\", \"text\": \"string\"}\n      ],\n      \"correctAnswer\": \"A\",\n      \"explanation\": \"string\"\n    }\n  ]\n}\n\nRules:\n- Generate exactly five questions.\n- Questions must be specific to this material.\n- Each question must have exactly four options: A, B, C, D.\n- correctAnswer must be A, B, C, or D.\n- explanation must help the learner understand the answer.`;\n\nreturn [\n  {\n    json: {\n      ...material,\n      materialId: callback.materialId,\n      userId: callback.userId,\n      chatId: callback.chatId,\n      callbackQueryId: callback.callbackQueryId,\n      chatInput: prompt,\n    },\n  },\n];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -1720,6 +1720,28 @@
       ],
       "id": "b5d600c3-ff9b-4c32-a28f-22563d860d1a",
       "name": "Prepare Fresh Material Response"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Extract Material ID').first().json.chatId }}",
+        "text": "=Generating a 5-question quiz for:\n\n{{ $('Load Material').first().json.title }}\n\nThis can take a moment.",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1376,
+        992
+      ],
+      "id": "98807895-2eba-4764-9470-9de15cc2b13c",
+      "name": "Send Quiz Generation Message",
+      "webhookId": "7838f286-ff97-4f5a-95eb-adf40953e118",
+      "credentials": {
+        "telegramApi": {
+          "id": "ihPWnYRp34xU7q2q",
+          "name": "Telegram account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -1934,7 +1956,7 @@
       "main": [
         [
           {
-            "node": "Prepare Examiner Prompt",
+            "node": "Send Quiz Generation Message",
             "type": "main",
             "index": 0
           }
@@ -2261,6 +2283,17 @@
           }
         ]
       ]
+    },
+    "Send Quiz Generation Message": {
+      "main": [
+        [
+          {
+            "node": "Prepare Examiner Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
@@ -2268,7 +2301,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "a9ba46f3-cfb1-455b-960f-be0a2b87e763",
+  "versionId": "92251335-8859-4fe9-9675-557d8f283b35",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "3e53940abcdba50b1f84058a3847b8de80ea98470135f44e0abbfc1001b585c4"
