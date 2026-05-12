@@ -1,0 +1,24 @@
+#!/bin/sh
+
+set -eu
+
+check_file() {
+  file="$1"
+
+  if git show ":$file" | grep -Eq '[0-9]{8,12}:[A-Za-z0-9_-]{30,}'; then
+    echo "Blocked commit: Telegram bot token-like secret found in staged JSON file: $file" >&2
+    echo "Replace the token with {{TELEGRAM_BOT_TOKEN}} before committing." >&2
+    exit 1
+  fi
+
+  if git show ":$file" | grep -Eq 'api\.telegram\.org/bot[^\{][^/"]+/sendMessage'; then
+    echo "Blocked commit: raw Telegram Bot API token URL found in staged JSON file: $file" >&2
+    echo "Use https://api.telegram.org/bot{{TELEGRAM_BOT_TOKEN}}/sendMessage instead." >&2
+    exit 1
+  fi
+}
+
+git diff --cached --name-only --diff-filter=ACMR -- '*.json' | while IFS= read -r file; do
+  [ -z "$file" ] && continue
+  check_file "$file"
+done
