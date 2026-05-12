@@ -44,12 +44,11 @@
           "values": [
             {
               "conditions": {
-                "combinator": "and",
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
                   "typeValidation": "strict",
-                  "version": 1
+                  "version": 3
                 },
                 "conditions": [
                   {
@@ -58,21 +57,22 @@
                     "operator": {
                       "type": "string",
                       "operation": "startsWith"
-                    }
+                    },
+                    "id": "bc0a7b39-6c29-44f3-915a-1bdd46e17882"
                   }
-                ]
+                ],
+                "combinator": "and"
               },
               "renameOutput": true,
               "outputKey": "start"
             },
             {
               "conditions": {
-                "combinator": "and",
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
                   "typeValidation": "strict",
-                  "version": 1
+                  "version": 3
                 },
                 "conditions": [
                   {
@@ -81,21 +81,22 @@
                     "operator": {
                       "type": "string",
                       "operation": "startsWith"
-                    }
+                    },
+                    "id": "768dbbdc-f370-4025-93f5-fb979f3f25e2"
                   }
-                ]
+                ],
+                "combinator": "and"
               },
               "renameOutput": true,
               "outputKey": "help"
             },
             {
               "conditions": {
-                "combinator": "and",
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
                   "typeValidation": "strict",
-                  "version": 1
+                  "version": 3
                 },
                 "conditions": [
                   {
@@ -104,7 +105,8 @@
                     "operator": {
                       "type": "string",
                       "operation": "startsWith"
-                    }
+                    },
+                    "id": "4e85309d-20cb-4083-a307-007d875d56f7"
                   },
                   {
                     "leftValue": "={{ $json.text }}",
@@ -112,21 +114,22 @@
                     "operator": {
                       "type": "string",
                       "operation": "contains"
-                    }
+                    },
+                    "id": "d54170bb-7065-4808-96ac-c41a243f278a"
                   }
-                ]
+                ],
+                "combinator": "and"
               },
               "renameOutput": true,
               "outputKey": "learnWithUrl"
             },
             {
               "conditions": {
-                "combinator": "or",
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
                   "typeValidation": "strict",
-                  "version": 1
+                  "version": 3
                 },
                 "conditions": [
                   {
@@ -135,7 +138,8 @@
                     "operator": {
                       "type": "string",
                       "operation": "equals"
-                    }
+                    },
+                    "id": "4a9a6d4a-4b26-4df6-ac00-49fcc60cc989"
                   },
                   {
                     "leftValue": "={{ $json.text }}",
@@ -143,21 +147,22 @@
                     "operator": {
                       "type": "string",
                       "operation": "startsWith"
-                    }
+                    },
+                    "id": "2892fc2a-19ed-4a98-8409-cd63934e8082"
                   }
-                ]
+                ],
+                "combinator": "or"
               },
               "renameOutput": true,
               "outputKey": "learnNoUrl"
             },
             {
               "conditions": {
-                "combinator": "and",
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
                   "typeValidation": "strict",
-                  "version": 1
+                  "version": 3
                 },
                 "conditions": [
                   {
@@ -166,21 +171,22 @@
                     "operator": {
                       "type": "string",
                       "operation": "startsWith"
-                    }
+                    },
+                    "id": "8bf7a7b8-cfa5-45e5-bb16-dc6fa0333f2d"
                   }
-                ]
+                ],
+                "combinator": "and"
               },
               "renameOutput": true,
               "outputKey": "quiz"
             },
             {
               "conditions": {
-                "combinator": "and",
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
                   "typeValidation": "strict",
-                  "version": 1
+                  "version": 3
                 },
                 "conditions": [
                   {
@@ -189,21 +195,22 @@
                     "operator": {
                       "type": "string",
                       "operation": "startsWith"
-                    }
+                    },
+                    "id": "291880d4-8dc0-4f37-b486-2ec1b50c8a52"
                   }
-                ]
+                ],
+                "combinator": "and"
               },
               "renameOutput": true,
               "outputKey": "topicCallback"
             },
             {
               "conditions": {
-                "combinator": "and",
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
                   "typeValidation": "strict",
-                  "version": 1
+                  "version": 3
                 },
                 "conditions": [
                   {
@@ -212,12 +219,38 @@
                     "operator": {
                       "type": "string",
                       "operation": "startsWith"
-                    }
+                    },
+                    "id": "6f6522c0-6843-4f39-b5ae-9a888bf15b26"
                   }
-                ]
+                ],
+                "combinator": "and"
               },
               "renameOutput": true,
               "outputKey": "answerCallback"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "f1294613-780e-416e-8743-9e9c4e0c0f2d",
+                    "leftValue": "={{ $json.callbackData }}",
+                    "rightValue": "=topics:",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "topicsPageCallback"
             }
           ]
         },
@@ -238,7 +271,7 @@
     {
       "parameters": {
         "chatId": "={{ $json.chatId }}",
-        "text": "Welcome to BrAIny Buddy.\n\nSend /learn <url> to summarize a learning material.\nSend /quiz to practice saved topics.",
+        "text": "Hi, I’m BrAIny Buddy.\n\nSend me a public learning link and I’ll turn it into:\n• a structured summary\n• key concepts\n• a 5-question quiz\n\nCommands:\n/learn <url> - save and summarize a material\n/quiz - choose a saved topic and practice\n/help - show this message\n\nExample:\n/learn https://web.dev/learn/html/semantic-html/\n",
         "additionalFields": {}
       },
       "id": "53f32241-57d9-450f-bb95-f9d7769ab413",
@@ -337,7 +370,7 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        1872,
+        2080,
         816
       ],
       "credentials": {
@@ -376,44 +409,8 @@
     },
     {
       "parameters": {
-        "dataTableId": {
-          "__rl": true,
-          "value": "OucbL9ApEovEdnow",
-          "mode": "list",
-          "cachedResultName": "learning_materials",
-          "cachedResultUrl": "/projects/ctLX77vBblhMtYP5/datatables/OucbL9ApEovEdnow"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "materialId": "={{ $json.materialId }}",
-            "userId": "={{ $json.userId }}",
-            "chatId": "={{ $json.chatId }}",
-            "url": "={{ $json.url }}",
-            "title": "={{ $json.title }}",
-            "content": "={{ $json.content }}",
-            "summary": "={{ $json.summary }}",
-            "keyPointsJson": "={{ $json.keyPointsJson }}",
-            "conceptsJson": "={{ $json.conceptsJson }}",
-            "difficulty": "={{ $json.difficulty }}",
-            "addedAt": "={{ $json.addedAt }}"
-          }
-        },
-        "options": {}
-      },
-      "id": "5e49055e-c0e5-42ef-93b3-8fbc8d483b59",
-      "name": "Save to learning_materials",
-      "type": "n8n-nodes-base.dataTable",
-      "typeVersion": 1.1,
-      "position": [
-        2384,
-        592
-      ]
-    },
-    {
-      "parameters": {
         "chatId": "={{ $json.chatId }}",
-        "text": "Usage: /learn https://example.com/article",
+        "text": "Send a public learning URL after /learn.  Example: /learn https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Introduction  Tip: articles, docs pages, and tutorials work best.",
         "additionalFields": {}
       },
       "id": "11de7384-0fb7-447b-817b-4d63ef1e7cbb",
@@ -435,7 +432,7 @@
     {
       "parameters": {
         "chatId": "={{ $json.chatId }}",
-        "text": "I didn't understand that command. Try /help for available commands.",
+        "text": "I did not recognize that message.  Use: /learn <url> - add a learning material /quiz - practice a saved topic /help - see instructions  If you pasted a link, send it like this: /learn https://example.com/article",
         "additionalFields": {}
       },
       "id": "c9baa50e-ec8d-4f03-a683-09cfb72b6d0d",
@@ -456,8 +453,8 @@
     },
     {
       "parameters": {
-        "chatId": "={{ $('Prepare Material Data').first().json.chatId }}",
-        "text": "=Learning material saved: {{ $('Prepare Material Data').first().json.title }}\n\nDifficulty: {{ $('Prepare Material Data').first().json.difficulty }}\n\nSummary:\n{{ $('Prepare Material Data').first().json.summary }}\n\nKey points:\n{{ $('Prepare Material Data').first().json.keyPointsText }}\n\nMain concepts:\n{{ $('Prepare Material Data').first().json.conceptsText }}\n",
+        "chatId": "={{ $('Choose Material ID').first().json.chatId }}",
+        "text": "=Learning material saved: {{ $('Choose Material ID').first().json.title }}\n\nDifficulty: {{ $('Choose Material ID').first().json.difficulty }}\n\nSummary:\n{{ $('Choose Material ID').first().json.summary }}\n\nKey points:\n{{ $('Choose Material ID').first().json.keyPointsText }}\n\nMain concepts:\n{{ $('Choose Material ID').first().json.conceptsText }}",
         "replyMarkup": "inlineKeyboard",
         "inlineKeyboard": {
           "rows": [
@@ -467,7 +464,7 @@
                   {
                     "text": "Start quiz",
                     "additionalFields": {
-                      "callback_data": "=topic:{{ $('Prepare Material Data').first().json.materialId }}"
+                      "callback_data": "={{ 'topic:' + $('Choose Material ID').first().json.materialId }}"
                     }
                   }
                 ]
@@ -480,8 +477,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        2592,
-        592
+        2800,
+        416
       ],
       "id": "b849b955-d6ef-4979-80c4-71d708238c5a",
       "name": "Send Summary with Quiz Button",
@@ -511,7 +508,8 @@
             }
           ]
         },
-        "returnAll": true
+        "returnAll": true,
+        "orderBy": true
       },
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
@@ -524,7 +522,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const materials = $input.all().map(item => item.json);\n\nconst original = $('Normalize Telegram Update').first().json;\n\nif (!materials.length) {\n  return [\n    {\n      json: {\n        chatId: original.chatId,\n        hasMaterials: false,\n        text: 'No saved materials yet. Send /learn <url> first.',\n      },\n    },\n  ];\n}\n\nconst rows = materials.map(material => {\n  const title = material.title || material.url || material.materialId;\n  return [\n    {\n      text: title.slice(0, 64),\n      callback_data: `topic:${material.materialId}`,\n    },\n  ];\n});\n\nreturn [\n  {\n    json: {\n      chatId: original.chatId,\n      hasMaterials: true,\n      text: 'Choose a saved topic:',\n      replyMarkup: {\n        inline_keyboard: rows,\n      },\n    },\n  },\n];\n"
+        "jsCode": "const materials = $input.all().map(item => item.json);\nconst update = $('Normalize Telegram Update').first().json;\n\nconst PAGE_SIZE = 8;\n\nif (!materials.length) {\n  return [\n    {\n      json: {\n        chatId: update.chatId,\n        hasMaterials: false,\n        text: 'No saved materials yet. Send /learn <url> first.',\n        replyMarkup: { inline_keyboard: [] },\n      },\n    },\n  ];\n}\n\nconst getTime = material => {\n  const value = material.addedAt || material.createdAt || material.updatedAt || '';\n  const time = Date.parse(value);\n  return Number.isNaN(time) ? 0 : time;\n};\n\nconst sorted = [...materials].sort((a, b) => {\n  const timeDiff = getTime(b) - getTime(a);\n\n  if (timeDiff !== 0) {\n    return timeDiff;\n  }\n\n  return String(b.materialId || '').localeCompare(String(a.materialId || ''));\n});\n\nlet page = 0;\nconst callbackData = update.callbackData || '';\n\nif (callbackData.startsWith('topics:')) {\n  const requestedPage = Number(callbackData.replace(/^topics:/, ''));\n  page = Number.isInteger(requestedPage) ? requestedPage : 0;\n}\n\nconst totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));\npage = Math.max(0, Math.min(page, totalPages - 1));\n\nconst start = page * PAGE_SIZE;\nconst pageItems = sorted.slice(start, start + PAGE_SIZE);\n\nconst rows = pageItems.map(material => {\n  const title = material.title || material.url || material.materialId;\n\n  return [\n    {\n      text: title.slice(0, 64),\n      callback_data: `topic:${material.materialId}`,\n    },\n  ];\n});\n\nconst navigation = [];\n\nif (page > 0) {\n  navigation.push({\n    text: 'Newer topics',\n    callback_data: `topics:${page - 1}`,\n  });\n}\n\nif (page < totalPages - 1) {\n  navigation.push({\n    text: 'Older topics',\n    callback_data: `topics:${page + 1}`,\n  });\n}\n\nif (navigation.length) {\n  rows.push(navigation);\n}\n\nreturn [\n  {\n    json: {\n      chatId: update.chatId,\n      hasMaterials: true,\n      page,\n      totalPages,\n      totalMaterials: sorted.length,\n      text: `Choose a saved topic (${page + 1}/${totalPages}):`,\n      replyMarkup: {\n        inline_keyboard: rows,\n      },\n    },\n  },\n];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -534,45 +532,6 @@
       ],
       "id": "f87fb421-5547-4009-99dd-2263adaffcb1",
       "name": "Build Material Buttons"
-    },
-    {
-      "parameters": {
-        "chatId": "={{ $json.chatId }}",
-        "text": "={{ $json.text }}",
-        "replyMarkup": "inlineKeyboard",
-        "inlineKeyboard": {
-          "rows": [
-            {
-              "row": {
-                "buttons": [
-                  {
-                    "text": "={{ $json.replyMarkup.inline_keyboard[0][0].text }}",
-                    "additionalFields": {
-                      "callback_data": "={{ $json.replyMarkup.inline_keyboard[0][0].callback_data }}"
-                    }
-                  }
-                ]
-              }
-            }
-          ]
-        },
-        "additionalFields": {}
-      },
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [
-        1392,
-        832
-      ],
-      "id": "b4aac2a6-4ed6-483c-a8dc-6662cf6b3375",
-      "name": "Send Materials List",
-      "webhookId": "82a10bd7-560f-455b-815b-1755b54002c9",
-      "credentials": {
-        "telegramApi": {
-          "id": "ihPWnYRp34xU7q2q",
-          "name": "Telegram account"
-        }
-      }
     },
     {
       "parameters": {
@@ -622,7 +581,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1936,
+        2144,
         992
       ],
       "id": "8b70f9e3-b2d4-4c3d-a38f-499873b25ee1",
@@ -638,7 +597,7 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.9,
       "position": [
-        1584,
+        1792,
         992
       ],
       "id": "948dffd9-0dbd-4410-8f17-5663b9a52ab2",
@@ -657,7 +616,7 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        1616,
+        1824,
         1152
       ],
       "id": "7228753b-2a09-4792-9c77-39b504cec8ad",
@@ -677,7 +636,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2144,
+        2352,
         992
       ],
       "id": "9232af04-d6e9-40c0-a2d2-7907376d849c",
@@ -806,7 +765,7 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        2352,
+        2560,
         992
       ],
       "id": "46cbcd51-565b-4a20-9ad6-a1d1449d42c9",
@@ -819,7 +778,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2560,
+        2768,
         992
       ],
       "id": "f2a14e94-05a8-4e6a-8636-7e035fbe12c7",
@@ -832,7 +791,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1376,
+        1584,
         992
       ],
       "id": "7a19b2e6-62ca-4845-b80f-0034a773f705",
@@ -882,7 +841,7 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        2768,
+        2976,
         992
       ],
       "id": "6096ba44-c1a7-466c-bcc2-ef249ae6416e",
@@ -1204,6 +1163,251 @@
           "name": "Telegram account"
         }
       }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.telegram.org/{{ TELEGRAM_BOT_TOKEN }}/sendMessage",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.bodyJson }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1584,
+        832
+      ],
+      "id": "70baaeeb-0754-43b9-8a99-fccfaafa8f86",
+      "name": "Send Materials List HTTP"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\n\nreturn [\n  {\n    json: {\n      bodyJson: JSON.stringify({\n        chat_id: data.chatId,\n        text: data.text,\n        reply_markup: data.replyMarkup,\n      }),\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        832
+      ],
+      "id": "bb785b6e-dc34-4c4f-bdf5-3a0181eb2c71",
+      "name": "Prepare Materials HTTP Body"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "OucbL9ApEovEdnow",
+          "mode": "list",
+          "cachedResultName": "learning_materials",
+          "cachedResultUrl": "/projects/ctLX77vBblhMtYP5/datatables/OucbL9ApEovEdnow"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "userId",
+              "keyValue": "={{ $json.userId }}"
+            },
+            {
+              "keyName": "url",
+              "keyValue": "={{ $json.url }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "userId": "={{ $json.userId }}",
+            "chatId": "={{ $json.chatId }}",
+            "url": "={{ $json.url }}",
+            "title": "={{ $json.title }}",
+            "content": "={{ $json.content }}",
+            "summary": "={{ $json.summary }}",
+            "keyPointsJson": "={{ $json.keyPointsJson }}",
+            "conceptsJson": "={{ $json.conceptsJson }}",
+            "difficulty": "={{ $json.difficulty }}",
+            "addedAt": "={{ $json.addedAt }}",
+            "materialId": "={{ $json.materialId }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "materialId",
+              "displayName": "materialId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "userId",
+              "displayName": "userId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "chatId",
+              "displayName": "chatId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "content",
+              "displayName": "content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "keyPointsJson",
+              "displayName": "keyPointsJson",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "conceptsJson",
+              "displayName": "conceptsJson",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "difficulty",
+              "displayName": "difficulty",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "addedAt",
+              "displayName": "addedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "5e49055e-c0e5-42ef-93b3-8fbc8d483b59",
+      "name": "Upsert learning_materials",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2800,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "OucbL9ApEovEdnow",
+          "mode": "list",
+          "cachedResultName": "learning_materials",
+          "cachedResultUrl": "/projects/ctLX77vBblhMtYP5/datatables/OucbL9ApEovEdnow"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "userId",
+              "keyValue": "={{ $('Prepare Material Data').first().json.userId }}"
+            },
+            {
+              "keyName": "url",
+              "keyValue": "={{ $('Prepare Material Data').first().json.url }}"
+            }
+          ]
+        },
+        "limit": 1
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2368,
+        592
+      ],
+      "id": "e3ac1862-3a1b-4914-a159-71e888f69553",
+      "name": "Find Existing Material",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prepared = $('Prepare Material Data').first().json;\nconst existing = $input.first()?.json || {};\n\nreturn [\n  {\n    json: {\n      ...prepared,\n      materialId: existing.materialId || prepared.materialId,\n      existingMaterialId: existing.materialId || null,\n      wasExistingMaterial: Boolean(existing.materialId),\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2576,
+        592
+      ],
+      "id": "78468e9e-6f86-4b85-9f27-c938a5838fd8",
+      "name": "Choose Material ID"
     }
   ],
   "pinData": {},
@@ -1277,6 +1481,13 @@
         [
           {
             "node": "Parse Answer Callback",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Load User Materials",
             "type": "main",
             "index": 0
           }
@@ -1360,18 +1571,7 @@
       "main": [
         [
           {
-            "node": "Save to learning_materials",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Save to learning_materials": {
-      "main": [
-        [
-          {
-            "node": "Send Summary with Quiz Button",
+            "node": "Find Existing Material",
             "type": "main",
             "index": 0
           }
@@ -1393,7 +1593,7 @@
       "main": [
         [
           {
-            "node": "Send Materials List",
+            "node": "Prepare Materials HTTP Body",
             "type": "main",
             "index": 0
           }
@@ -1560,14 +1760,57 @@
           }
         ]
       ]
+    },
+    "Prepare Materials HTTP Body": {
+      "main": [
+        [
+          {
+            "node": "Send Materials List HTTP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert learning_materials": {
+      "main": [
+        []
+      ]
+    },
+    "Find Existing Material": {
+      "main": [
+        [
+          {
+            "node": "Choose Material ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Choose Material ID": {
+      "main": [
+        [
+          {
+            "node": "Upsert learning_materials",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Summary with Quiz Button",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "1212a4db-90e7-477b-8008-b2736c67a422",
+  "versionId": "0780b1f7-84de-4d47-8590-c2c970c0a02f",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "3e53940abcdba50b1f84058a3847b8de80ea98470135f44e0abbfc1001b585c4"
