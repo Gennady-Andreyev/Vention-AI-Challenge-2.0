@@ -102,6 +102,8 @@ The final workflow instead asks both AI roles to return raw JSON and then parses
 
 The Examiner prompt was moved into a `Prepare Examiner Prompt` Code node after an earlier version generated questions about literal n8n expressions such as `{{ $json.title }}`. Building `chatInput` in code ensured that the model received the selected material values rather than unresolved workflow syntax.
 
+The Teacher prompt also needed a calibration pass after functional testing. Beginner and intermediate materials were classified correctly, but advanced materials were repeatedly marked as intermediate. That led to a focused back-and-forth: the prompt was expanded from a simple rubric into a domain-independent difficulty classifier based on reader prerequisites, reasoning depth, and operational risk. The n8n node configuration was then checked to confirm that the updated prompt was actually present in the Teacher Agent, that the chat model was connected, that memory/tools were not involved, and that the downstream Code parser still handled the raw JSON output. After this adjustment, advanced classification worked as expected. This was a good example of a workflow that was technically correct but still needed qualitative prompt tuning.
+
 ## What Worked
 
 The strongest parts of the final solution came from combining n8n's visual workflow model with carefully scoped Code nodes. The Code nodes were useful for URL normalization, HTML cleanup, JSON parsing, quiz state validation, and Telegram payload preparation.
