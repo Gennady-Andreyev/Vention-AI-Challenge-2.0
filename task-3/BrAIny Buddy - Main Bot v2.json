@@ -320,7 +320,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        1632,
+        2224,
         576
       ],
       "onError": "continueErrorOutput"
@@ -334,7 +334,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2288,
+        2848,
         576
       ],
       "executeOnce": false
@@ -352,8 +352,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        3376,
-        688
+        3344,
+        576
       ]
     },
     {
@@ -371,8 +371,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        3376,
-        928
+        3408,
+        800
       ],
       "credentials": {
         "openAiApi": {
@@ -391,8 +391,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3664,
-        688
+        3632,
+        576
       ]
     },
     {
@@ -404,8 +404,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3840,
-        688
+        3808,
+        576
       ]
     },
     {
@@ -1168,7 +1168,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "=https://api.telegram.org/{{ TELEGRAM_BOT_TOKEN }}/sendMessage",
+        "url": "=https://api.telegram.org/bot{{ $vars.TELEGRAM_BOT_TOKEN }}/sendMessage",
         "sendBody": true,
         "contentType": "raw",
         "rawContentType": "application/json",
@@ -1358,8 +1358,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        4416,
-        688
+        4384,
+        576
       ]
     },
     {
@@ -1390,8 +1390,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        4032,
-        688
+        4000,
+        576
       ],
       "id": "e3ac1862-3a1b-4914-a159-71e888f69553",
       "name": "Find Existing Material",
@@ -1404,8 +1404,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4224,
-        688
+        4192,
+        576
       ],
       "id": "78468e9e-6f86-4b85-9f27-c938a5838fd8",
       "name": "Choose Material ID"
@@ -1454,7 +1454,7 @@
       "typeVersion": 1.2,
       "position": [
         1376,
-        672
+        608
       ],
       "id": "c7ef93ac-543f-4eca-91bb-f5628e386c9f",
       "name": "Send Learn URL Error",
@@ -1475,8 +1475,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1376,
-        496
+        2032,
+        576
       ],
       "id": "13e18f2a-32ef-4ddf-8dce-8c6d03fba1c5",
       "name": "Send Processing Message",
@@ -1495,8 +1495,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1840,
-        560
+        2432,
+        576
       ],
       "id": "66e5a7d9-ebce-4924-bf4a-fa1826a88dec",
       "name": "Check Fetch Result"
@@ -1510,8 +1510,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1936,
-        768
+        2624,
+        816
       ],
       "id": "4483bc48-7365-48e9-8d93-17ee6c6cf175",
       "name": "Send Fetch Error",
@@ -1551,8 +1551,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        2048,
-        560
+        2624,
+        576
       ],
       "id": "e5470fbc-1104-4185-bc4f-3ef33bfdb35d",
       "name": "Is Fetch OK?"
@@ -1585,7 +1585,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        2496,
+        3024,
         576
       ],
       "id": "d1bf1165-8b7a-498b-a69a-a9751f34af56",
@@ -1600,8 +1600,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        2720,
-        768
+        3184,
+        816
       ],
       "id": "dd8c82e9-c109-4c2c-a432-6320b70d66af",
       "name": "Send Content Error",
@@ -1641,8 +1641,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        2704,
-        576
+        1392,
+        432
       ],
       "id": "ee28aec2-68e2-4576-b0a0-7b82fb725b02",
       "name": "Find Existing Material Early",
@@ -1650,13 +1650,13 @@
     },
     {
       "parameters": {
-        "jsCode": "const source = $('Extract URL').first().json;\nconst existing = $input.first()?.json || {};\n\nconst hasExistingMaterial = Boolean(existing.materialId);\n\nreturn [\n  {\n    json: {\n      ...source,\n      ...existing,\n      hasExistingMaterial,\n    },\n  },\n];\n"
+        "jsCode": "const source = $('Extract URL').first().json;\nconst existing = $input.first()?.json || {};\n\nconst hasExistingMaterial = Boolean(existing.materialId);\n\nreturn [\n  {\n    json: {\n      ...source,\n      ...existing,\n      chatId: existing.chatId || source.chatId,\n      userId: existing.userId || source.userId,\n      url: existing.url || source.url,\n      hasExistingMaterial,\n    },\n  },\n];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2912,
-        576
+        1616,
+        432
       ],
       "id": "673625ad-009c-4aaa-8ab6-48345933f0e0",
       "name": "Route Existing Material"
@@ -1689,20 +1689,20 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        3120,
-        576
+        1840,
+        432
       ],
       "id": "100cb8dc-ca05-46f9-8be3-56d59b11737a",
       "name": "Has Existing Material?"
     },
     {
       "parameters": {
-        "jsCode": "const material = $input.first().json;\n\nreturn [\n  {\n    json: {\n      materialId: material.materialId,\n      userId: material.userId,\n      chatId: material.chatId,\n      url: material.url,\n      title: material.title,\n      summary: material.summary,\n      difficulty: material.difficulty,\n      keyPointsText: JSON.parse(material.keyPointsJson || '[]')\n        .map(point => `• ${point}`)\n        .join('\\n') || 'No key points saved.',\n      conceptsText: JSON.parse(material.conceptsJson || '[]')\n        .map(concept => `• ${concept}`)\n        .join('\\n') || 'No concepts saved.',\n      responsePrefix: 'I already have this material saved.',\n    },\n  },\n];\n"
+        "jsCode": "const material = $input.first().json;\n\nfunction parseJsonArray(value) {\n  try {\n    const parsed = JSON.parse(value || '[]');\n    return Array.isArray(parsed) ? parsed : [];\n  } catch {\n    return [];\n  }\n}\n\nconst keyPoints = parseJsonArray(material.keyPointsJson);\nconst concepts = parseJsonArray(material.conceptsJson);\n\nreturn [\n  {\n    json: {\n      materialId: material.materialId,\n      userId: material.userId,\n      chatId: material.chatId,\n      url: material.url,\n      title: material.title,\n      summary: material.summary,\n      difficulty: material.difficulty,\n      keyPointsText: keyPoints.length\n        ? keyPoints.map(point => `• ${point}`).join('\\n')\n        : 'No key points saved.',\n      conceptsText: concepts.length\n        ? concepts.map(concept => `• ${concept}`).join('\\n')\n        : 'No concepts saved.',\n      responsePrefix: 'I already have this material saved.',\n    },\n  },\n];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3440,
+        2112,
         432
       ],
       "id": "3c1c4115-84f2-433a-8d4c-af2fa43f0f36",
@@ -1715,8 +1715,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4608,
-        688
+        4576,
+        576
       ],
       "id": "b5d600c3-ff9b-4c32-a28f-22563d860d1a",
       "name": "Prepare Fresh Material Response"
@@ -2219,7 +2219,7 @@
       "main": [
         [
           {
-            "node": "Send Processing Message",
+            "node": "Find Existing Material Early",
             "type": "main",
             "index": 0
           }
@@ -2277,7 +2277,7 @@
       "main": [
         [
           {
-            "node": "Find Existing Material Early",
+            "node": "Teacher Agent - Summarize Material",
             "type": "main",
             "index": 0
           }
@@ -2324,7 +2324,7 @@
         ],
         [
           {
-            "node": "Teacher Agent - Summarize Material",
+            "node": "Send Processing Message",
             "type": "main",
             "index": 0
           }
@@ -2392,6 +2392,11 @@
           }
         ]
       ]
+    },
+    "Send Summary with Quiz Button": {
+      "main": [
+        []
+      ]
     }
   },
   "active": true,
@@ -2399,7 +2404,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "6744ba9c-3c89-47a0-959e-52f519b3e709",
+  "versionId": "b900df84-c16d-4d39-8982-7e18a808bd91",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "3e53940abcdba50b1f84058a3847b8de80ea98470135f44e0abbfc1001b585c4"
