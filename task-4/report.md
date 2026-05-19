@@ -164,6 +164,8 @@ Subsequent review passes hardened the suite in stages. The tests added independe
 
 Later reviews focused on overfitting and MCP-boundary proof. These led to black-box MCP tests for multiple dependencies and dependency buffers, runway spacing through resources, chronological timelines, status sections, capacity failures, adversarial bottleneck selection, transitive cancellation, repeated deterministic schedule generation, and crew-only horizon failure with enough stands available.
 
+Another review checked whether the MCP surface was sufficiently self-describing for an LLM client. The first version had non-empty but terse docstrings. The final tool and resource descriptions now include accepted enum values, side effects, timing semantics, common reason codes, and hints about which resources to inspect after each operation.
+
 By the final review, no major E2E coverage issue remained. The last changes were low-risk robustness work and the isolated crew-capacity MCP split case.
 
 ## Testing Summary

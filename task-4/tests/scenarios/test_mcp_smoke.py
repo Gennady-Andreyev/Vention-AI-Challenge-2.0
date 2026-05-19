@@ -39,6 +39,30 @@ async def test_mcp_server_exposes_tools_and_resources(tmp_path):
             submit_schema = tools_by_name["submit_flight_plan"].inputSchema
             for required_tool in tool_names:
                 assert tools_by_name[required_tool].description
+            submit_description = _description_text(
+                tools_by_name["submit_flight_plan"].description
+            )
+            schedule_description = _description_text(
+                tools_by_name["generate_airport_schedule"].description
+            )
+            status_description = _description_text(
+                tools_by_name["get_airport_status"].description
+            )
+            cancel_description = _description_text(tools_by_name["cancel_flight"].description)
+            bottleneck_description = _description_text(
+                tools_by_name["analyze_bottleneck"].description
+            )
+            assert "arrival" in submit_description
+            assert "departure" in submit_description
+            assert "high" in submit_description
+            assert "atc://flights/queue" in submit_description
+            assert "replace" in schedule_description
+            assert "atc://schedule/timeline" in (
+                schedule_description
+            )
+            assert "reason codes" in status_description
+            assert "dependent flights" in cancel_description
+            assert "total_elapsed_seconds" in bottleneck_description
             assert {
                 "flight_number",
                 "movement_type",
@@ -62,6 +86,21 @@ async def test_mcp_server_exposes_tools_and_resources(tmp_path):
             for required_uri in resource_uris:
                 assert resources_by_uri[required_uri].mimeType == "application/json"
                 assert resources_by_uri[required_uri].description
+            assert "reason code" in _description_text(
+                resources_by_uri["atc://flights/queue"].description
+            )
+            assert "separation minima" in _description_text(
+                resources_by_uri["atc://runways/usage"].description
+            )
+            assert "ramp crew capacity" in _description_text(
+                resources_by_uri["atc://stands/usage"].description
+            )
+            assert "Arrival time means" in (
+                _description_text(resources_by_uri["atc://schedule/timeline"].description)
+            )
+            assert "no_suitable_runway" in (
+                _description_text(resources_by_uri["atc://constraints/active"].description)
+            )
 
             await session.call_tool("reset_airport_state", {})
             for flight_number, movement_type, priority in [
@@ -1071,6 +1110,10 @@ def _tool_payload(result):
 def _resource_payload(result):
     assert result.contents
     return json.loads(result.contents[0].text)
+
+
+def _description_text(value):
+    return " ".join(value.split())
 
 
 def _canonical_json(payload):
