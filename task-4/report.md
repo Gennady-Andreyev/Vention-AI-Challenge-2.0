@@ -57,6 +57,8 @@ The implementation models physical runway pairs rather than isolated runway ends
 
 The task's "gate" requirement is implemented as stand/gate allocation. Resource names use `stands` because stand allocation is common operational terminology, while the README makes the gate mapping explicit.
 
+Requested arrival/departure times were reviewed as a possible realism feature. In production slot management, a flight would often carry an ETA, ETD, EOBT, controlled time, or acceptable slot window. The task's submitted-flight fields did not include any requested-time parameter, so the implementation treats scheduling as batch allocation from the current queue: it assigns the earliest safe feasible runway movement times from priority, dependencies, and resource constraints. This was documented in the README as an intentional simplification rather than an accidental omission.
+
 Several aviation details were intentionally kept out of scope: intersecting runway geometry, LAHSO, taxiway crossings, wake turbulence categories, weather, SID/STAR routing, aircraft performance, and real multi-controller coordination. Constant same-runway ATC separation minima remain in scope because they prevent obviously unrealistic schedules.
 
 ## MCP Design
@@ -177,6 +179,7 @@ Automated tests cover the required scenarios and additional domain guardrails:
 - MCP-visible gate/stand horizon failure
 - MCP-visible crew-capacity horizon failure with enough stands available
 - MCP-visible multiple dependencies and dependency buffers
+- MCP-visible 15-flight priority sequence where late-filed high-priority flights schedule first
 - MCP-visible transitive cancellation and regenerated timelines
 - MCP-visible adversarial bottleneck selection
 - MCP-visible deterministic repeated schedule generation
@@ -204,7 +207,7 @@ Final verification passed:
 
 ```text
 uv run pytest
-76 passed
+77 passed
 
 uv run ruff check
 All checks passed!

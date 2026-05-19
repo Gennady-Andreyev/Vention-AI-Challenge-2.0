@@ -97,6 +97,225 @@ Example MCP client configuration:
 
 The server uses stdio transport. It does not print operational logs to stdout because stdout is reserved for MCP protocol messages.
 
+## Manual Testing With MCP Inspector
+
+The server is an MCP stdio process, not an interactive command-line app. Running
+`uv run python -m atc_mcp.server` directly starts a process that waits for MCP
+JSON-RPC messages. For manual testing, use an MCP-compatible client. The most
+convenient local option is the MCP Inspector.
+
+Manual Inspector testing requires Node.js/npm because the Inspector is launched
+with `npx @modelcontextprotocol/inspector`. No extra Python dependency is needed;
+the server-side MCP SDK is already included through `mcp[cli]`.
+
+From `task-4/`, first install the Python environment:
+
+```bash
+uv sync
+```
+
+Then set an isolated manual-test configuration:
+
+```bash
+export ATC_DB_PATH="./data/manual-test.sqlite3"
+export ATC_AIRPORT_ICAO="KJFK"
+export ATC_OPERATIONAL_DAY_START_UTC="2026-01-01T00:00:00Z"
+export ATC_RUNWAY_CONFIG="09L/27R:3682,09R/27L:2560"
+export ATC_ACTIVE_RUNWAY_ENDS="09L,09R"
+export ATC_CLOSED_RUNWAY_ENDS=""
+export ATC_GATE_COUNT="3"
+export ATC_RAMP_CREW_COUNT="2"
+export ATC_ARRIVAL_SEPARATION_SECONDS="180"
+export ATC_DEPARTURE_SEPARATION_SECONDS="120"
+export ATC_MIXED_SEPARATION_SECONDS="180"
+export ATC_STAND_TURNAROUND_SECONDS="600"
+export ATC_CONNECTION_BUFFER_SECONDS="900"
+export ATC_PLANNING_HORIZON_SECONDS="7200"
+export ATC_ARRIVAL_RUNWAY_OCCUPANCY_SECONDS="60"
+export ATC_DEPARTURE_RUNWAY_OCCUPANCY_SECONDS="90"
+```
+
+Start the Inspector:
+
+```bash
+npx @modelcontextprotocol/inspector uv run python -m atc_mcp.server
+```
+
+Use the Inspector UI to list tools and resources. You should see the tools
+documented below and the `atc://...` resources listed in the resources pane.
+
+Do not use `mcp dev src/atc_mcp/server.py` for this repository. The server is
+designed to be launched as the package module `python -m atc_mcp.server`, and
+file-based imports can break the package-relative imports.
+
+### Manual Scenario: Morning Rush
+
+1. Call `reset_airport_state`.
+2. Call `submit_flight_plan` with:
+
+```json
+{
+  "flight_number": "AAL101",
+  "movement_type": "arrival",
+  "traffic_priority": "high"
+}
+```
+
+3. Submit a medium-priority departure:
+
+```json
+{
+  "flight_number": "BAW202",
+  "movement_type": "departure",
+  "traffic_priority": "medium"
+}
+```
+
+4. Submit a low-priority arrival:
+
+```json
+{
+  "flight_number": "DLH303",
+  "movement_type": "arrival",
+  "traffic_priority": "low"
+}
+```
+
+5. Submit a low-priority departure:
+
+```json
+{
+  "flight_number": "AFR404",
+  "movement_type": "departure",
+  "traffic_priority": "low"
+}
+```
+
+6. Call `generate_airport_schedule`.
+7. Read `atc://flights/queue`, `atc://schedule/timeline`,
+   `atc://runways/usage`, `atc://stands/usage`, and `atc://airport/status`.
+
+Expected result: `scheduled_count` is `4`, all four flights are `scheduled`,
+the timeline has four movements, and the runway and stand/gate windows are
+non-overlapping.
+
+### Manual Scenario: Heavy Hauler
+
+1. Call `reset_airport_state`.
+2. Submit an oversized departure:
+
+```json
+{
+  "flight_number": "GTI900",
+  "movement_type": "departure",
+  "traffic_priority": "high",
+  "required_runway_length_m": 99999
+}
+```
+
+3. Call `generate_airport_schedule`.
+4. Read `atc://flights/queue` and `atc://constraints/active`.
+
+Expected result: `GTI900` remains visible as `unscheduled` with reason code
+`no_suitable_runway`.
+
+### Manual Scenario: Priority Rush
+
+This longer scenario shows that priority is evaluated during schedule generation,
+not just at filing time. It uses a single active runway so the runway sequence is
+contested.
+
+For this scenario, use:
+
+```bash
+export ATC_RUNWAY_CONFIG="09/27:3000"
+export ATC_ACTIVE_RUNWAY_ENDS="09"
+export ATC_GATE_COUNT="20"
+export ATC_RAMP_CREW_COUNT="20"
+export ATC_STAND_TURNAROUND_SECONDS="0"
+export ATC_CONNECTION_BUFFER_SECONDS="0"
+export ATC_ARRIVAL_RUNWAY_OCCUPANCY_SECONDS="60"
+export ATC_ARRIVAL_SEPARATION_SECONDS="120"
+export ATC_PLANNING_HORIZON_SECONDS="5000"
+```
+
+Then call `reset_airport_state` and submit these 15 arrivals in this exact
+filing order:
+
+| Filing order | Flight | Priority |
+|---:|---|---|
+| 1 | `LOW101` | `low` |
+| 2 | `MED201` | `medium` |
+| 3 | `LOW102` | `low` |
+| 4 | `MED202` | `medium` |
+| 5 | `LOW103` | `low` |
+| 6 | `MED203` | `medium` |
+| 7 | `LOW104` | `low` |
+| 8 | `LOW105` | `low` |
+| 9 | `MED204` | `medium` |
+| 10 | `LOW106` | `low` |
+| 11 | `MED205` | `medium` |
+| 12 | `HIGH301` | `high` |
+| 13 | `HIGH302` | `high` |
+| 14 | `HIGH303` | `high` |
+| 15 | `HIGH304` | `high` |
+
+Call `generate_airport_schedule`, then read `atc://schedule/timeline`.
+
+Expected result: all 15 flights are scheduled, and the scheduled timeline starts
+with the late-filed high-priority flights, then medium-priority flights, then
+low-priority flights:
+
+```text
+HIGH301, HIGH302, HIGH303, HIGH304,
+MED201, MED202, MED203, MED204, MED205,
+LOW101, LOW102, LOW103, LOW104, LOW105, LOW106
+```
+
+### Manual Scenario: Connecting Flight
+
+1. Call `reset_airport_state`.
+2. Submit the inbound flight:
+
+```json
+{
+  "flight_number": "AAL100",
+  "movement_type": "arrival",
+  "traffic_priority": "high"
+}
+```
+
+3. Submit the dependent outbound flight:
+
+```json
+{
+  "flight_number": "AAL101",
+  "movement_type": "departure",
+  "traffic_priority": "high",
+  "dependencies": ["AAL100"]
+}
+```
+
+4. Call `generate_airport_schedule`.
+5. Read `atc://schedule/timeline`.
+
+Expected result: both flights are scheduled, and `AAL101` starts after
+`AAL100` ends plus `ATC_CONNECTION_BUFFER_SECONDS`.
+
+### Manual Scenario: Cancellation
+
+After scheduling the connecting-flight scenario, call `cancel_flight` with:
+
+```json
+{ "flight_number": "AAL100" }
+```
+
+Then read `atc://flights/queue`, `atc://schedule/timeline`, and
+`atc://airport/status`.
+
+Expected result: `AAL100` is `cancelled`, dependent flights are re-evaluated,
+and blocked or cancelled flights are absent from the active movement timeline.
+
 ## MCP Tools
 
 Tools mutate airport state or trigger computation.
@@ -167,6 +386,17 @@ The implementation uses constant simplified ATC separation minima for arrival-ar
 
 Times are calculated internally as integer seconds from the operational day start. Responses expose exact `t_plus_seconds` for machines, plus ISO UTC and Zulu labels such as `0015Z` for aviation-style inspection.
 
+Submitted flight plans do not include requested arrival times, requested departure
+times, slot windows, EOBT/ETA/ETD, or controlled takeoff/arrival times. This is a
+deliberate simplification based on the task's submitted-flight fields. The server
+therefore acts as a batch allocator: `generate_airport_schedule` assigns the
+earliest safe feasible runway movement times from the current queue, priority
+order, dependencies, and airport resource limits. In the returned timeline,
+arrival time means landing/runway-occupancy start, and departure time means
+takeoff/runway-occupancy start. A production slot-management system would also
+accept requested times or acceptable time windows and schedule around those
+constraints.
+
 The task uses the word “gate”; the server uses the commercial-aviation term `stand_id` and documents it as the stand/gate allocation concept.
 
 ## Validation Walkthrough
@@ -187,6 +417,17 @@ Heavy Hauler:
 3. Generate the schedule.
 
 Expected: the flight remains visible as `unscheduled` with reason code `no_suitable_runway`; other valid flights still schedule.
+
+Priority Rush:
+
+1. Configure one active runway end and enough stands/crew, as shown in the
+   manual testing section.
+2. Submit 15 arrivals, filing low and medium priority traffic first and
+   high-priority traffic last.
+3. Generate the schedule and inspect `atc://schedule/timeline`.
+
+Expected: the high-priority flights are scheduled before the earlier-filed
+medium and low priority flights while same-priority filing order remains stable.
 
 Connecting Flight:
 

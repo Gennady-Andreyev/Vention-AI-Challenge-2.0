@@ -187,6 +187,119 @@ async def test_mcp_client_can_validate_dependencies_separation_and_status_resour
 
 
 @pytest.mark.asyncio
+async def test_mcp_long_priority_sequence_schedules_late_high_priority_flights_first(tmp_path):
+    env = os.environ.copy()
+    env.update(
+        make_env(
+            tmp_path,
+            ATC_RUNWAY_CONFIG="09/27:3000",
+            ATC_ACTIVE_RUNWAY_ENDS="09",
+            ATC_GATE_COUNT="20",
+            ATC_RAMP_CREW_COUNT="20",
+            ATC_STAND_TURNAROUND_SECONDS="0",
+            ATC_CONNECTION_BUFFER_SECONDS="0",
+            ATC_ARRIVAL_RUNWAY_OCCUPANCY_SECONDS="60",
+            ATC_ARRIVAL_SEPARATION_SECONDS="120",
+            ATC_PLANNING_HORIZON_SECONDS="5000",
+        )
+    )
+    filed_flights = [
+        ("LOW101", "low"),
+        ("MED201", "medium"),
+        ("LOW102", "low"),
+        ("MED202", "medium"),
+        ("LOW103", "low"),
+        ("MED203", "medium"),
+        ("LOW104", "low"),
+        ("LOW105", "low"),
+        ("MED204", "medium"),
+        ("LOW106", "low"),
+        ("MED205", "medium"),
+        ("HIGH301", "high"),
+        ("HIGH302", "high"),
+        ("HIGH303", "high"),
+        ("HIGH304", "high"),
+    ]
+    server_params = StdioServerParameters(
+        command=sys.executable,
+        args=["-m", "atc_mcp.server"],
+        env=env,
+    )
+
+    async with stdio_client(server_params) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+            await session.call_tool("reset_airport_state", {})
+            for flight_number, priority in filed_flights:
+                await session.call_tool(
+                    "submit_flight_plan",
+                    {
+                        "flight_number": flight_number,
+                        "movement_type": "arrival",
+                        "traffic_priority": priority,
+                    },
+                )
+
+            schedule = _tool_payload(await session.call_tool("generate_airport_schedule", {}))
+            queue = _resource_payload(await session.read_resource("atc://flights/queue"))
+            timeline = _resource_payload(await session.read_resource("atc://schedule/timeline"))
+            runways = _resource_payload(await session.read_resource("atc://runways/usage"))
+            scheduled_sequence = [
+                movement["flight_number"] for movement in timeline["movements"]
+            ]
+            priority_sequence = [
+                movement["traffic_priority"] for movement in timeline["movements"]
+            ]
+            filed_sequence_by_flight = {
+                flight["flight_number"]: flight["filing_sequence"] for flight in queue["flights"]
+            }
+
+            assert schedule["scheduled_count"] == 15
+            assert scheduled_sequence == [
+                "HIGH301",
+                "HIGH302",
+                "HIGH303",
+                "HIGH304",
+                "MED201",
+                "MED202",
+                "MED203",
+                "MED204",
+                "MED205",
+                "LOW101",
+                "LOW102",
+                "LOW103",
+                "LOW104",
+                "LOW105",
+                "LOW106",
+            ]
+            assert priority_sequence == ["high"] * 4 + ["medium"] * 5 + ["low"] * 6
+            assert min(
+                filed_sequence_by_flight[flight_number]
+                for flight_number in ["HIGH301", "HIGH302", "HIGH303", "HIGH304"]
+            ) > max(
+                filed_sequence_by_flight[flight_number]
+                for flight_number in [
+                    "LOW101",
+                    "MED201",
+                    "LOW102",
+                    "MED202",
+                    "LOW103",
+                    "MED203",
+                    "LOW104",
+                    "LOW105",
+                    "MED204",
+                    "LOW106",
+                    "MED205",
+                ]
+            )
+            assert all(
+                flight["state"] == "scheduled" for flight in queue["flights"]
+            )
+            _assert_timeline_is_chronological(timeline["movements"])
+            _assert_runway_resource_spacing(runways)
+
+
+@pytest.mark.asyncio
 async def test_mcp_ramp_crew_capacity_is_visible_in_schedule_and_resources(tmp_path):
     env = os.environ.copy()
     env.update(
