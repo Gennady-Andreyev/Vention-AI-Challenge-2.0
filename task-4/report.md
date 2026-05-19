@@ -61,6 +61,8 @@ Requested arrival/departure times were reviewed as a possible realism feature. I
 
 Several aviation details were intentionally kept out of scope: intersecting runway geometry, LAHSO, taxiway crossings, wake turbulence categories, weather, SID/STAR routing, aircraft performance, and real multi-controller coordination. Constant same-runway ATC separation minima remain in scope because they prevent obviously unrealistic schedules.
 
+Authentication, authorization, tenancy, and audit logging were also kept out of scope. The server is intended as a local stdio MCP server for a trusted client. In a production deployment, mutating capabilities such as flight submission, cancellation, schedule generation, and especially `reset_airport_state` would need role-based access control and durable audit logs.
+
 ## MCP Design
 
 The MCP interface follows a simple mapping: tools perform operations or computations, and resources expose read-only airport context.

@@ -399,6 +399,18 @@ constraints.
 
 The task uses the word “gate”; the server uses the commercial-aviation term `stand_id` and documents it as the stand/gate allocation concept.
 
+## Security Notes
+
+Authentication, authorization, tenancy, and audit logging are out of scope for
+this challenge submission. The server is intended to run as a local stdio MCP
+server for a trusted MCP client.
+
+Any connected client can call mutating tools such as `submit_flight_plan`,
+`generate_airport_schedule`, `cancel_flight`, and `reset_airport_state`, and can
+inspect the full airport state through resources. In a production deployment,
+these capabilities would need role-based access control, durable audit logs, and
+careful handling of destructive validation helpers such as `reset_airport_state`.
+
 ## Validation Walkthrough
 
 Morning Rush:
